@@ -63,7 +63,7 @@
             4
           ],
           "details": "1. 프로젝트 GitHub 저장소 설정:\n   - 새 GitHub 저장소 생성\n   - 프로젝트 코드 푸시\n   - `.gitignore` 파일에 환경 변수 파일 추가\n2. Vercel 계정 생성 및 프로젝트 설정:\n   - GitHub 저장소 연결\n   - 환경 변수 설정 (Supabase URL 및 API 키)\n   - 빌드 설정 구성\n3. 자동 배포 설정:\n   - main 브랜치에 푸시 시 자동 배포 설정\n   - 풀 리퀘스트에 대한 프리뷰 배포 설정\n4. 커스텀 도메인 설정 (선택 사항)\n5. 테스트: 코드 변경 사항을 푸시하여 자동 배포가 정상적으로 작동하는지 확인",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         }
       ]
