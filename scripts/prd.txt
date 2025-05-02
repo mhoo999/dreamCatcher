@@ -1,0 +1,89 @@
+<context>
+# Overview  
+드림캐쳐(DreamCatcher)는 사용자의 꿈을 구체적인 실행 계획과 행동 목표로 전환하여, AI의 도움으로 일간/주간/월간 목표를 설정하고 달성할 수 있도록 돕는 퍼스널 성장형 목표 관리 앱입니다. 단순한 바람에 그치지 않고, 시각화 도구와 동기부여 콘텐츠, 목표 트래킹, 성장 피드백 시스템을 결합하여 자기계발을 효과적으로 지원합니다.
+
+# Core Features  
+- **꿈 시각화(드림캐쳐 만들기)**: 사용자가 자신의 꿈을 키워드, 이미지, 색상, 텍스트 등으로 자유롭게 시각화하고, 드래그&드롭 방식으로 나만의 드림캐쳐를 디자인할 수 있습니다. 완성된 이미지는 잠금화면 배경 등으로 저장 가능하며, 꿈이 바뀔 때마다 업데이트할 수 있습니다.
+- **AI 기반 목표 세팅**: 입력된 꿈을 분석하여 일간/주간/월간 목표를 자동으로 생성합니다. 사용자는 우선순위, 난이도, 세부 내용을 직접 수정할 수 있습니다.
+- **목표 진행 관리 & 집중 모드**: 오늘의 할 일, 주간/월간 목표를 확인하고 체크할 수 있으며, 뽀모도로/자유 설정 타이머로 집중 시간을 기록하고 목표 실행과 연동할 수 있습니다.
+- **알림 & 동기부여 콘텐츠**: 매일 맞춤 알림(오늘의 할 일, 다짐 메시지)과 함께, 꿈과 연결된 유튜브, 책, 인터뷰, 인용문 등 동기부여 콘텐츠를 큐레이션합니다.
+- **피드백 & 성장 시스템**: 주간/월간 리포트(달성률, 연속성 등 시각화), 다음 목표 자동 제안, 업적 시스템(배지, 점수, 레벨업 등)을 제공합니다.
+- **마이 페이지**: 나의 꿈 리스트, 이전 목표 히스토리, 드림캐쳐 이미지 갤러리, 앱 설정(알림 시간, 테마, 개인정보 등) 기능을 포함합니다.
+
+# User Experience  
+- **주요 사용자**: 자기계발에 관심이 많고, 목표를 구체적으로 관리하고 싶은 20~40대 직장인, 대학생, 프리랜서 등
+- **주요 플로우**:
+    1. 온보딩(앱 소개, 회원가입, 꿈 입력)
+    2. AI 기반 목표 자동 생성 및 커스터마이즈
+    3. 드림캐쳐 시각화 및 저장
+    4. 목표 진행 관리(체크리스트, 타이머, 피드백)
+    5. 동기부여 콘텐츠 및 알림 수신
+    6. 마이페이지에서 히스토리/설정 관리
+- **UI/UX 고려사항**: 직관적이고 감성적인 디자인, 드래그&드롭 인터랙션, 시각적 피드백 강화, 맞춤형 알림 및 콘텐츠 추천, 접근성 고려
+</context>
+<PRD>
+# Technical Architecture  
+- **System Components**:
+    - Web app (React, initial target)
+    - Progressive Web App (PWA) and mobile adaptation planned for future
+    - Backend API (Supabase: Database, Auth, Storage, Functions)
+    - AI Service Integration (OpenAI/Claude API for goal suggestion)
+    - Notification Service (Web Push, Supabase Edge Functions)
+    - Media Storage (Supabase Storage)
+- **Data Models**:
+    - User (id, email, password, profile, settings)
+    - Dream (id, userId, title, description, visualizationData, createdAt, updatedAt)
+    - Goal (id, dreamId, type[daily/weekly/monthly], content, priority, status, dueDate, progress)
+    - Routine/Timer (id, userId, goalId, type, duration, records)
+    - MotivationContent (id, type, title, url, tags)
+    - Achievement (id, userId, type, badge, score, level, history)
+- **APIs and Integrations**:
+    - Supabase RESTful API & Realtime
+    - AI goal suggestion endpoint
+    - Notification scheduling (Web Push, Supabase Edge Functions)
+    - Media upload/download endpoints (Supabase Storage)
+- **Infrastructure Requirements**:
+    - Supabase project (DB, Auth, Storage, Edge Functions)
+    - Vercel/Netlify for frontend hosting
+    - CI/CD pipeline
+    - Secure authentication (Supabase Auth)
+    - Monitoring & logging
+
+# Development Roadmap  
+- **MVP Requirements**:
+    1. Web onboarding (signup/login, dream input via React)
+    2. AI-based goal suggestion (daily/weekly/monthly)
+    3. Dream visualization tool (drag & drop, image save)
+    4. Goal management (checklist, progress tracking)
+    5. Focus timer (pomodoro/custom)
+    6. Basic notification system (web push)
+    7. Simple motivation content feed
+    8. My Page (dream list, history, settings)
+- **Future Enhancements**:
+    - PWA/mobile adaptation (installable web app, offline support)
+    - Advanced AI feedback & next-goal recommendation
+    - Social features (dream sharing, community)
+    - More sophisticated achievement/badge system
+    - Deep analytics & personalized reports
+    - Third-party integrations (calendar, health apps)
+    - Multi-language support
+
+# Logical Dependency Chain
+- 1단계: 사용자 인증 및 온보딩 → 꿈 입력 및 저장
+- 2단계: AI 목표 자동 생성 → 목표 관리 UI/UX 구현
+- 3단계: 드림캐쳐 시각화 툴 개발 → 이미지 저장 기능
+- 4단계: 집중 타이머 및 목표 진행 트래킹
+- 5단계: 알림/동기부여 콘텐츠 큐레이션 → 피드백/업적 시스템
+- 6단계: 마이페이지, 히스토리, 설정 등 부가 기능
+
+# Risks and Mitigations  
+- **AI 목표 추천 품질**: 사용자 입력이 다양해 AI 추천이 부정확할 수 있음 → 예시/가이드 제공, 사용자 직접 수정 기능 강화
+- **시각화 툴 복잡성**: 드래그&드롭, 이미지 처리 등에서 기술적 난이도 존재 → 오픈소스 라이브러리 적극 활용, MVP는 최소 기능부터 구현
+- **데이터 보안/개인정보**: 꿈/목표 등 민감 정보 저장 → 암호화, 인증 강화, 최소 권한 원칙 적용
+- **리소스 한계**: 초기 개발 인력/시간 부족 → 핵심 기능 우선 개발, 점진적 확장
+
+# Appendix  
+- 참고: 동기부여 콘텐츠 큐레이션을 위해 유튜브, 도서 API, 인용문 DB 등 외부 데이터 활용 가능성 검토
+- 기술 스택 예시: React, Supabase, Vercel/Netlify, OpenAI/Claude API
+- 추가 리서치: 자기계발 앱 UX/UI 트렌드, AI 기반 목표 관리 사례, Supabase 활용 사례
+</PRD>

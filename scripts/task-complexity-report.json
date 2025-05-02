@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "generatedAt": "2025-05-02T11:33:44.470Z",
+    "tasksAnalyzed": 10,
+    "thresholdScore": 5,
+    "projectName": "Your Project Name",
+    "usedResearch": false
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "프로젝트 인프라 및 인증 구축",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the process of setting up a React project with Supabase integration, implementing authentication flows, and configuring CI/CD into clear, sequential subtasks that cover project initialization, Supabase setup, auth component development, route protection, and deployment pipeline configuration.",
+      "reasoning": "This task involves multiple technical components including React setup, Supabase integration, authentication implementation, route configuration, and CI/CD setup. Each component requires specific technical knowledge and configuration steps, making it moderately complex."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "온보딩 및 꿈 입력 흐름 구현",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the onboarding and dream input flow implementation into specific subtasks covering the multi-step onboarding UI design, dream input form creation, Supabase data model setup for users and dreams, validation logic, and first-time user experience components.",
+      "reasoning": "This task requires both frontend development (onboarding UI, forms) and backend work (data models, validation). It has moderate complexity due to the need for a cohesive user experience across multiple steps and proper data modeling."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "AI 기반 목표 제안 시스템 개발",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the AI-based goal suggestion system into detailed subtasks covering API integration with OpenAI/Claude, prompt engineering for quality goal generation, service development for processing dream data, Supabase goal data model implementation, UI for goal management, and categorization by timeframe.",
+      "reasoning": "This task has high complexity due to AI integration, prompt engineering, and complex data processing. It requires both technical implementation of AI services and thoughtful design of prompts to generate meaningful goals from user dreams."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "꿈 시각화 도구 생성",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Divide the dream visualization tool implementation into specific subtasks covering canvas setup with drag-and-drop libraries, component creation for visual elements, image upload functionality with Supabase Storage, data structure design for visualizations, save/load functionality, and export options.",
+      "reasoning": "Creating an interactive visualization tool involves complex UI components, drag-and-drop functionality, image handling, and data persistence. The integration with Supabase Storage and the need for a flexible yet structured data model adds to the complexity."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "목표 관리 인터페이스 개발",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the goal management interface development into subtasks covering UI design for daily/weekly/monthly goals, interactive checklist implementation, progress visualization components, CRUD operations for goals, and filtering/sorting functionality.",
+      "reasoning": "This task involves creating multiple related UI components and implementing various user interactions. The complexity comes from ensuring a cohesive experience across different goal timeframes and implementing proper state management for goal tracking."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "집중 타이머 기능 구현",
+      "complexityScore": 5,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the focus timer feature implementation into subtasks covering timer component creation with Pomodoro presets, timer controls development, Supabase data model for routines/timers, goal association functionality, session history tracking, and notification system for timer events.",
+      "reasoning": "The timer functionality is moderately complex, requiring precise time tracking, state management, and integration with the goal system. The additional features like session history and notifications add some complexity, but the core timer functionality is well-defined."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "알림 시스템 설정",
+      "complexityScore": 7,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Break down the notification system setup into subtasks covering Web Push API integration, Supabase Edge Functions configuration for scheduled notifications, permission request flow implementation, notification template creation for different types, user preference UI development, and scheduling logic based on preferences and deadlines.",
+      "reasoning": "Implementing web push notifications involves working with browser APIs, server-side scheduling, and user permission management. The need for Supabase Edge Functions and various notification types adds complexity to this task."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "동기부여 콘텐츠 피드 생성",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "Divide the motivational content feed creation into subtasks covering MotivationContent data model implementation, content feed UI development, content tagging and relevance matching system, recommendation algorithm implementation, external API integrations, and bookmarking functionality.",
+      "reasoning": "This task involves creating a content recommendation system with tagging and relevance matching. The complexity comes from designing an effective recommendation algorithm and potentially integrating with external content sources."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "성취 및 피드백 시스템 구현",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the achievements and feedback system implementation into subtasks covering Achievement data model creation, achievement trigger logic based on user behavior, badge and level design, weekly/monthly report generation with visualizations, streak tracking implementation, and UI components for displaying achievements and progress.",
+      "reasoning": "This system requires complex event tracking and trigger logic to award achievements based on user behavior. The reporting functionality with visualizations and streak tracking adds additional complexity to the implementation."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "설정 및 기록이 포함된 마이 페이지 개발",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Divide the My Page development into subtasks covering overall UI design with multiple sections, dream history view with filtering/sorting, settings implementation for notifications and preferences, visualization gallery creation, profile editing functionality, and data export options.",
+      "reasoning": "The My Page requires integration of multiple components from other tasks and presents them in a cohesive interface. The complexity comes from properly organizing and displaying various types of user data and providing comprehensive settings options."
+    }
+  ]
+}
