@@ -8,6 +8,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import SignUp from './components/auth/SignUp'
 import SignIn from './components/auth/SignIn'
 import LogoutButton from './components/auth/LogoutButton'
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Dashboard from './pages/Dashboard';
 
 function Home() {
   const [count, setCount] = useState(0)
@@ -48,6 +50,11 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/logout" element={<LogoutButton />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
