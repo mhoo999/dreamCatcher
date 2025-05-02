@@ -4,6 +4,10 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { AuthProvider } from './contexts/AuthContext'
+import SignUp from './components/auth/SignUp'
+import SignIn from './components/auth/SignIn'
+import LogoutButton from './components/auth/LogoutButton'
 
 function Home() {
   const [count, setCount] = useState(0)
@@ -36,12 +40,17 @@ function Home() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/test-supabase" element={<TestSupabase />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/test-supabase" element={<TestSupabase />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/logout" element={<LogoutButton />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
