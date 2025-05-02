@@ -27,7 +27,7 @@ Create React App 또는 Vite를 사용하여 새 React 프로젝트를 생성합
 4. 기본 라우팅 설정: React Router를 사용하여 기본 라우팅 구조 구현
 5. 테스트: `npm run dev`로 프로젝트가 정상적으로 실행되는지 확인
 
-## 2. Supabase 프로젝트 생성 및 클라이언트 설정 [pending]
+## 2. Supabase 프로젝트 생성 및 클라이언트 설정 [done]
 ### Dependencies: 1.1
 ### Description: Supabase 프로젝트를 생성하고 React 애플리케이션에 Supabase 클라이언트를 설정합니다.
 ### Details:

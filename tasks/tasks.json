@@ -27,7 +27,7 @@
             1
           ],
           "details": "1. Supabase 계정 생성 및 새 프로젝트 설정\n2. Supabase 클라이언트 라이브러리 설치: `npm install @supabase/supabase-js`\n3. 환경 변수 설정:\n   - `.env` 파일 생성\n   - `VITE_SUPABASE_URL`과 `VITE_SUPABASE_ANON_KEY` 환경 변수 추가\n4. Supabase 클라이언트 초기화 파일 생성 (`/src/services/supabase.ts`):\n   ```typescript\n   import { createClient } from '@supabase/supabase-js';\n   \n   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;\n   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;\n   \n   export const supabase = createClient(supabaseUrl, supabaseAnonKey);\n   ```\n5. 테스트: 간단한 쿼리를 실행하여 Supabase 연결 확인",
-          "status": "pending",
+          "status": "done",
           "parentTaskId": 1
         },
         {
