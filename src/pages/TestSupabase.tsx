@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '../services/supabase';
 
 const TestSupabase = () => {
