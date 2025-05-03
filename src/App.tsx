@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import TestSupabase from './pages/TestSupabase';
 // import { useState } from 'react'
 // import reactLogo from './assets/react.svg'
@@ -26,37 +26,35 @@ function App() {
   return (
     <AuthProvider>
       <AppShell>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/dream-input" element={<DreamInput />} />
-            <Route path="/test-supabase" element={<TestSupabase />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/logout" element={<LogoutButton />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/goals" element={
-              <ProtectedRoute>
-                <Goals />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="/dream/:id" element={
-              <ProtectedRoute>
-                <DreamDetail />
-              </ProtectedRoute>
-            } />
-          </Routes>
-        </BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/dream-input" element={<DreamInput />} />
+          <Route path="/test-supabase" element={<TestSupabase />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/logout" element={<LogoutButton />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/goals" element={
+            <ProtectedRoute>
+              <Goals />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/dream/:id" element={
+            <ProtectedRoute>
+              <DreamDetail />
+            </ProtectedRoute>
+          } />
+        </Routes>
       </AppShell>
     </AuthProvider>
   )
