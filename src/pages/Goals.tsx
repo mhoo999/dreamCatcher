@@ -1,87 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Card from '../components/common/Card';
-import { supabase } from '../services/supabase';
-import { useAuth } from '../contexts/AuthContext';
 import { fetchAllGoals } from '../services/supabase';
 import { Goal } from '../types/goal';
 
 const Goals: React.FC = () => {
-  const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [addError, setAddError] = useState<string | null>(null);
-  const [addSuccess, setAddSuccess] = useState(false);
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
-
-  const fetchGoals = () => {
-    if (!user) return;
-    setLoading(true);
-    setError(null);
-    supabase
-      .from('goals')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('id', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          setError('목표 목록을 불러오지 못했습니다: ' + error.message);
-          setGoals([]);
-        } else {
-          setGoals(
-            (data || []).map(g => ({
-              ...g,
-              date: g.created_at ? g.created_at.slice(0, 10) : '',
-            }))
-          );
-        }
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchGoals();
-    // eslint-disable-next-line
-  }, [user]);
-
-  const handleAddGoal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAddError(null);
-    setAddSuccess(false);
-    if (!user) {
-      setAddError('로그인이 필요합니다.');
-      return;
-    }
-    if (!title.trim() || !description.trim()) {
-      setAddError('제목과 설명을 입력하세요.');
-      return;
-    }
-    const { error } = await supabase.from('goals').insert([
-      {
-        user_id: user.id,
-        title,
-        description,
-        status: 'active',
-      }
-    ]);
-    if (error) {
-      setAddError('저장 실패: ' + error.message);
-    } else {
-      setAddSuccess(true);
-      setTitle('');
-      setDescription('');
-      fetchGoals();
-    }
-  };
-
-  const handleComplete = async (goalId: number) => {
-    setUpdatingId(goalId);
-    await supabase.from('goals').update({ status: 'done' }).eq('id', goalId);
-    setUpdatingId(null);
-    fetchGoals();
-  };
 
   useEffect(() => {
     async function loadGoals() {
