@@ -5,6 +5,7 @@ import Card from '../components/common/Card';
 import { ArrowLeft } from 'phosphor-react';
 import { Dream } from '../types/dream';
 import GoalList from '../components/common/GoalList';
+import DreamDeleteButton from '../components/common/DreamDeleteButton';
 
 const DreamDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -79,6 +80,9 @@ const DreamDetail: React.FC = () => {
                 <h3 className="font-semibold text-base mb-2">연결된 목표</h3>
                 <GoalList goals={dream.goals} onToggleCompleted={handleToggleCompleted} />
                 {goalUpdating && <div className="text-xs text-blue-500 mt-2">상태 변경 중...</div>}
+              </div>
+              <div className="mt-8 flex justify-end">
+                <DreamDeleteButton dreamId={dream.id} onDeleted={() => navigate('/')} />
               </div>
             </Card>
           </>
