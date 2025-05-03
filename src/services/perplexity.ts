@@ -1,8 +1,15 @@
-const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY;
+// 환경 변수 로딩 (Node.js 서버/브라우저 모두 지원)
+let PERPLEXITY_API_KEY = '';
+if (typeof process !== 'undefined' && process.env && process.env.PERPLEXITY_API_KEY) {
+  PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
+} else if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PERPLEXITY_API_KEY) {
+  PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY;
+}
+
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
 
 if (!PERPLEXITY_API_KEY) {
-  throw new Error('VITE_PERPLEXITY_API_KEY 환경변수가 설정되어 있지 않습니다.');
+  throw new Error('PERPLEXITY_API_KEY (서버) 또는 VITE_PERPLEXITY_API_KEY (클라이언트) 환경변수가 설정되어 있지 않습니다.');
 }
 
 export type PerplexityMessage = {
