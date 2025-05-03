@@ -8,4 +8,5 @@ export interface Goal {
   status: GoalStatus; // goal_status ENUM과 일치
   created_at: string;
   updated_at: string;
+  priority?: number;
 } 

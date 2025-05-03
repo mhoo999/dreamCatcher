@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Card from '../components/common/Card';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Goal } from '../types/goal';
 
 const DreamInput: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -14,6 +13,8 @@ const DreamInput: React.FC = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiGoals, setAiGoals] = useState<string | null>(null);
   const [goalSaveResult, setGoalSaveResult] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<'like' | 'dislike' | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
   const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,9 +103,37 @@ const DreamInput: React.FC = () => {
     }
   };
 
+  // 목표 재생성 핸들러
+  const handleRegenerate = async () => {
+    setRegenerating(true);
+    setAiGoals(null);
+    setGoalSaveResult(null);
+    setFeedback(null);
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/generate-goals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dream: `${title} ${description}`, deadline }),
+      });
+      const data = await res.json();
+      if (res.ok && data.goals) {
+        setAiGoals(data.goals);
+        // 목표 저장 로직은 기존과 동일하게 반복 가능 (생략)
+      } else {
+        setAiGoals('AI 목표 생성에 실패했습니다.');
+      }
+    } catch (e) {
+      setAiGoals('AI 목표 생성 중 오류가 발생했습니다.');
+    } finally {
+      setAiLoading(false);
+      setRegenerating(false);
+    }
+  };
+
   return (
-    <div className="max-w-[430px] mx-auto w-full px-4 py-8 flex flex-col items-center justify-center">
-      <Card>
+    <div className="w-full px-4 py-8 flex flex-col items-center justify-center min-h-screen bg-background">
+      <Card className="w-full max-w-[430px]">
         <h2 className="text-lg font-semibold text-primary mb-4">새로운 꿈 입력</h2>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
           <input
@@ -151,6 +180,34 @@ const DreamInput: React.FC = () => {
           <div className="mt-4 p-3 bg-gray-50 rounded text-sm whitespace-pre-line border border-gray-200">
             <div className="font-semibold text-primary mb-1">AI가 제안한 목표</div>
             {aiGoals}
+            <div className="flex gap-2 mt-3">
+              <button
+                className={`px-3 py-1 rounded bg-green-100 text-green-700 border border-green-300 hover:bg-green-200 transition ${feedback === 'like' ? 'ring-2 ring-green-400' : ''}`}
+                onClick={() => setFeedback('like')}
+                disabled={!!feedback}
+                type="button"
+              >
+                👍 좋아요
+              </button>
+              <button
+                className={`px-3 py-1 rounded bg-red-100 text-red-700 border border-red-300 hover:bg-red-200 transition ${feedback === 'dislike' ? 'ring-2 ring-red-400' : ''}`}
+                onClick={() => setFeedback('dislike')}
+                disabled={!!feedback}
+                type="button"
+              >
+                👎 싫어요
+              </button>
+              <button
+                className="px-3 py-1 rounded bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200 transition"
+                onClick={handleRegenerate}
+                disabled={aiLoading || regenerating}
+                type="button"
+              >
+                🔄 재생성
+              </button>
+            </div>
+            {feedback === 'like' && <div className="text-green-600 mt-1">피드백 감사합니다! 😊</div>}
+            {feedback === 'dislike' && <div className="text-red-600 mt-1">더 나은 목표를 위해 노력하겠습니다.</div>}
           </div>
         )}
         {goalSaveResult && <div className="text-blue-600 mt-2">{goalSaveResult}</div>}

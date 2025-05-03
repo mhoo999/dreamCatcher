@@ -192,7 +192,7 @@ group by d.id;
 8. API 인증 및 권한 검사 로직 추가
 9. 테스트: Postman/Insomnia를 사용한 API 엔드포인트 테스트
 
-## 6. 목표 제안 및 관리 UI 구현 [pending]
+## 6. 목표 제안 및 관리 UI 구현 [in-progress]
 ### Dependencies: 3.5
 ### Description: 사용자가 제안된 목표를 확인하고 관리할 수 있는 사용자 인터페이스 개발
 ### Details:
@@ -204,4 +204,803 @@ group by d.id;
 6. 새로운 목표 제안 요청 UI 구현
 7. 반응형 디자인 적용 (모바일/데스크톱)
 8. 테스트: 사용자 시나리오 기반 UI 테스트 및 사용성 평가
+
+<info added on 2025-05-03T08:40:36.181Z>
+## 추가 구현 상세
+
+### UI 컴포넌트 구조화
+- `GoalFeedbackControls.tsx`: 목표 품질 피드백 컴포넌트 (좋아요/싫어요, 재생성 버튼)
+- `GoalStatusIndicator.tsx`: 목표 상태 표시 컴포넌트 (대기중, 수락됨, 거부됨, 완료됨)
+- `GoalPrioritySelector.tsx`: 우선순위 선택/표시 컴포넌트
+
+### 피드백 시스템 구현
+```typescript
+// GoalFeedbackControls.tsx
+const GoalFeedbackControls: React.FC<{
+  goalId: string;
+  onLike: () => void;
+  onDislike: () => void;
+  onRegenerate: () => void;
+}> = ({ goalId, onLike, onDislike, onRegenerate }) => {
+  return (
+    <div className="goal-feedback-controls">
+      <IconButton onClick={onLike} aria-label="좋아요">
+        <ThumbUpIcon />
+      </IconButton>
+      <IconButton onClick={onDislike} aria-label="싫어요">
+        <ThumbDownIcon />
+      </IconButton>
+      <Button 
+        startIcon={<RefreshIcon />} 
+        onClick={onRegenerate}
+        size="small"
+      >
+        재생성
+      </Button>
+    </div>
+  );
+};
+```
+
+### 상태 관리 개선
+- 목표 생성/피드백/상태변경 과정의 상태 관리를 위한 커스텀 훅:
+```typescript
+// useGoalManagement.ts
+export const useGoalManagement = (dreamId: string) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [feedbackStatus, setFeedbackStatus] = useState<Record<string, 'liked' | 'disliked' | null>>({});
+  
+  const handleGoalFeedback = async (goalId: string, type: 'like' | 'dislike') => {
+    try {
+      await api.goals.provideFeedback(goalId, type);
+      setFeedbackStatus(prev => ({ ...prev, [goalId]: type === 'like' ? 'liked' : 'disliked' }));
+    } catch (error) {
+      console.error('Goal feedback failed:', error);
+    }
+  };
+  
+  // 추가 메서드들...
+  
+  return {
+    isGenerating,
+    feedbackStatus,
+    handleGoalFeedback,
+    // 기타 반환값...
+  };
+};
+```
+
+### 드래그 앤 드롭 우선순위 구현
+- react-beautiful-dnd 라이브러리 활용:
+```typescript
+// GoalPriorityList.tsx
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+const GoalPriorityList: React.FC<{ goals: Goal[], onPriorityChange: (reorderedGoals: Goal[]) => void }> = 
+  ({ goals, onPriorityChange }) => {
+  
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(goals);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    onPriorityChange(items);
+  };
+  
+  return (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="goals">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {goals.map((goal, index) => (
+              <Draggable key={goal.id} draggableId={goal.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    <GoalCard goal={goal} />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+```
+
+### 테스트 시나리오 구체화
+1. 목표 생성 → 피드백 → 재생성 → 저장 흐름
+2. 목표 우선순위 변경 → 서버 저장 → 새로고침 후 유지 확인
+3. 모바일/태블릿/데스크톱 반응형 레이아웃 검증
+4. 목표 상태 변경 시 시각적 피드백 및 애니메이션 검증
+
+### 성능 최적화
+- 목표 목록 렌더링 최적화를 위한 가상화(virtualization) 고려
+- 상태 변경 시 불필요한 리렌더링 방지를 위한 메모이제이션 적용
+</info added on 2025-05-03T08:40:36.181Z>
+
+<info added on 2025-05-03T08:42:12.835Z>
+<info added on 2025-05-15T14:22:18.000Z>
+## DreamInput 목표 피드백 UI 구현 상세
+
+### 피드백 컴포넌트 구현
+```typescript
+// GoalFeedbackBar.tsx
+const GoalFeedbackBar: React.FC<{
+  goalId: string;
+  onLike: (goalId: string) => Promise<void>;
+  onDislike: (goalId: string) => Promise<void>;
+  onRegenerate: () => Promise<void>;
+  isRegenerating: boolean;
+}> = ({ goalId, onLike, onDislike, onRegenerate, isRegenerating }) => {
+  const [feedbackGiven, setFeedbackGiven] = useState<'like' | 'dislike' | null>(null);
+  
+  const handleLike = async () => {
+    if (!feedbackGiven) {
+      await onLike(goalId);
+      setFeedbackGiven('like');
+      toast.success('피드백 감사합니다!');
+    }
+  };
+  
+  const handleDislike = async () => {
+    if (!feedbackGiven) {
+      await onDislike(goalId);
+      setFeedbackGiven('dislike');
+      toast.info('더 나은 목표를 제안해 드리겠습니다');
+    }
+  };
+  
+  return (
+    <div className="flex items-center space-x-2 mt-2">
+      <button 
+        onClick={handleLike}
+        className={`p-1 rounded-full ${feedbackGiven === 'like' ? 'bg-green-100 text-green-600' : 'hover:bg-gray-100'}`}
+        disabled={!!feedbackGiven}
+        aria-label="좋아요"
+      >
+        <ThumbUpIcon className="h-5 w-5" />
+      </button>
+      
+      <button 
+        onClick={handleDislike}
+        className={`p-1 rounded-full ${feedbackGiven === 'dislike' ? 'bg-red-100 text-red-600' : 'hover:bg-gray-100'}`}
+        disabled={!!feedbackGiven}
+        aria-label="싫어요"
+      >
+        <ThumbDownIcon className="h-5 w-5" />
+      </button>
+      
+      <button
+        onClick={onRegenerate}
+        disabled={isRegenerating}
+        className="ml-auto flex items-center text-sm text-blue-600 hover:text-blue-800"
+        aria-label="목표 재생성"
+      >
+        {isRegenerating ? (
+          <SpinnerIcon className="animate-spin h-4 w-4 mr-1" />
+        ) : (
+          <RefreshIcon className="h-4 w-4 mr-1" />
+        )}
+        재생성
+      </button>
+    </div>
+  );
+};
+```
+
+### DreamInput 통합 구현
+```typescript
+// DreamInput.tsx (관련 부분)
+const DreamInput: React.FC = () => {
+  // ... 기존 상태 관리 코드 ...
+  const [isRegenerating, setIsRegenerating] = useState<Record<string, boolean>>({});
+  const [feedbackStats, setFeedbackStats] = useState<{
+    likes: number;
+    dislikes: number;
+    regenerations: number;
+  }>({ likes: 0, dislikes: 0, regenerations: 0 });
+
+  const handleGoalLike = async (goalId: string) => {
+    try {
+      await api.goals.provideFeedback(goalId, 'like');
+      setFeedbackStats(prev => ({ ...prev, likes: prev.likes + 1 }));
+      // 피드백 분석 이벤트 추적
+      analytics.track('goal_feedback', { type: 'like', goalId });
+    } catch (error) {
+      console.error('Failed to submit like feedback:', error);
+      toast.error('피드백 제출 중 오류가 발생했습니다');
+    }
+  };
+
+  const handleGoalDislike = async (goalId: string) => {
+    try {
+      await api.goals.provideFeedback(goalId, 'dislike');
+      setFeedbackStats(prev => ({ ...prev, dislikes: prev.dislikes + 1 }));
+      analytics.track('goal_feedback', { type: 'dislike', goalId });
+    } catch (error) {
+      console.error('Failed to submit dislike feedback:', error);
+      toast.error('피드백 제출 중 오류가 발생했습니다');
+    }
+  };
+
+  const handleGoalRegenerate = async (goalId: string) => {
+    if (isRegenerating[goalId]) return;
+    
+    setIsRegenerating(prev => ({ ...prev, [goalId]: true }));
+    try {
+      const newGoal = await api.goals.regenerate(goalId);
+      setGoals(prev => prev.map(g => g.id === goalId ? newGoal : g));
+      setFeedbackStats(prev => ({ ...prev, regenerations: prev.regenerations + 1 }));
+      analytics.track('goal_regenerate', { goalId });
+      toast.success('목표가 재생성되었습니다');
+    } catch (error) {
+      console.error('Failed to regenerate goal:', error);
+      toast.error('목표 재생성 중 오류가 발생했습니다');
+    } finally {
+      setIsRegenerating(prev => ({ ...prev, [goalId]: false }));
+    }
+  };
+
+  // ... 렌더링 코드 ...
+  return (
+    <div>
+      {/* ... 기존 UI ... */}
+      <div className="goals-container mt-4 space-y-3">
+        {goals.map(goal => (
+          <div key={goal.id} className="goal-card p-3 border rounded-lg bg-white shadow-sm">
+            <p className="text-gray-800">{goal.content}</p>
+            <GoalFeedbackBar
+              goalId={goal.id}
+              onLike={handleGoalLike}
+              onDislike={handleGoalDislike}
+              onRegenerate={() => handleGoalRegenerate(goal.id)}
+              isRegenerating={isRegenerating[goal.id] || false}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+### 피드백 데이터 활용 계획
+1. 사용자별 피드백 패턴 분석을 통한 목표 생성 알고리즘 개선
+2. 목표 품질 지표 대시보드 구현 (관리자용)
+3. 사용자 피드백 기반 목표 템플릿 자동 개선 시스템
+
+### 모바일 최적화
+- 터치 영역 확대 (최소 44x44px)
+- 피드백 버튼 간격 조정으로 오탭 방지
+- 재생성 중 로딩 상태 표시 강화
+- 진동 피드백 추가 (navigator.vibrate API 활용)
+
+### 접근성 개선
+- ARIA 속성 추가 (aria-pressed, aria-busy 등)
+- 키보드 네비게이션 지원
+- 고대비 모드 지원을 위한 색상 조정
+</info added on 2025-05-15T14:22:18.000Z>
+</info added on 2025-05-03T08:42:12.835Z>
+
+<info added on 2025-05-03T08:43:40.904Z>
+<info added on 2025-05-20T09:15:42.000Z>
+## DreamDetail 목표 관리 UX 개선 상세 설계
+
+### GoalCard 상태 관리 개선
+```typescript
+// GoalStatusControl.tsx
+const GoalStatusControl: React.FC<{
+  goal: Goal;
+  onStatusChange: (goalId: string, newStatus: GoalStatus) => Promise<void>;
+}> = ({ goal, onStatusChange }) => {
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  const handleStatusChange = async (newStatus: GoalStatus) => {
+    if (goal.status === newStatus || isUpdating) return;
+    
+    setIsUpdating(true);
+    try {
+      await onStatusChange(goal.id, newStatus);
+      // 성공 시 시각적 피드백
+      toast.success(`목표가 ${getStatusLabel(newStatus)} 상태로 변경되었습니다`);
+    } catch (error) {
+      console.error('Status change failed:', error);
+      toast.error('상태 변경 중 오류가 발생했습니다');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  return (
+    <div className="goal-status-controls flex items-center space-x-2 mt-2">
+      {isUpdating ? (
+        <Spinner size="sm" className="text-primary" />
+      ) : (
+        <>
+          <StatusButton 
+            status="accepted"
+            currentStatus={goal.status}
+            onClick={() => handleStatusChange('accepted')}
+            icon={<CheckIcon />}
+            label="수락"
+          />
+          <StatusButton 
+            status="rejected"
+            currentStatus={goal.status}
+            onClick={() => handleStatusChange('rejected')}
+            icon={<XIcon />}
+            label="거부"
+          />
+          <StatusButton 
+            status="completed"
+            currentStatus={goal.status}
+            onClick={() => handleStatusChange('completed')}
+            icon={<CheckCircleIcon />}
+            label="완료"
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+// StatusButton 컴포넌트 - 상태별 스타일링 적용
+const StatusButton: React.FC<{
+  status: GoalStatus;
+  currentStatus: GoalStatus;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}> = ({ status, currentStatus, onClick, icon, label }) => {
+  const isActive = status === currentStatus;
+  
+  // 상태별 스타일 매핑
+  const styles = {
+    accepted: {
+      active: 'bg-green-100 text-green-700 border-green-300',
+      inactive: 'hover:bg-green-50 text-gray-600'
+    },
+    rejected: {
+      active: 'bg-red-100 text-red-700 border-red-300',
+      inactive: 'hover:bg-red-50 text-gray-600'
+    },
+    completed: {
+      active: 'bg-blue-100 text-blue-700 border-blue-300',
+      inactive: 'hover:bg-blue-50 text-gray-600'
+    },
+    pending: {
+      active: 'bg-yellow-100 text-yellow-700 border-yellow-300',
+      inactive: 'hover:bg-yellow-50 text-gray-600'
+    }
+  };
+  
+  const buttonStyle = isActive ? styles[status].active : styles[status].inactive;
+  
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center px-3 py-1 rounded-full border text-sm transition-colors ${buttonStyle}`}
+      aria-pressed={isActive}
+      aria-label={`${label} 상태로 변경`}
+    >
+      <span className="mr-1">{icon}</span>
+      {label}
+    </button>
+  );
+};
+```
+
+### 우선순위 관리 최적화
+```typescript
+// GoalPriorityManager.tsx
+const GoalPriorityManager: React.FC<{
+  goals: Goal[];
+  onPriorityChange: (reorderedGoals: Goal[]) => Promise<void>;
+}> = ({ goals, onPriorityChange }) => {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [localGoals, setLocalGoals] = useState<Goal[]>(goals);
+  
+  // 서버와 로컬 상태 동기화
+  useEffect(() => {
+    setLocalGoals(goals);
+  }, [goals]);
+  
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+    
+    // 로컬 상태 즉시 업데이트 (낙관적 UI 업데이트)
+    const reordered = Array.from(localGoals);
+    const [removed] = reordered.splice(source.index, 1);
+    reordered.splice(destination.index, 0, removed);
+    
+    setLocalGoals(reordered);
+    setIsUpdating(true);
+    
+    try {
+      // 서버에 우선순위 변경 요청
+      await onPriorityChange(reordered);
+      // 분석 이벤트 추적
+      analytics.track('goal_priority_changed', {
+        goalId: removed.id,
+        oldPosition: source.index,
+        newPosition: destination.index
+      });
+    } catch (error) {
+      console.error('Priority update failed:', error);
+      toast.error('우선순위 변경 중 오류가 발생했습니다');
+      // 실패 시 원래 상태로 복원
+      setLocalGoals(goals);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
+  return (
+    <div className="goal-priority-manager">
+      {isUpdating && (
+        <div className="text-sm text-blue-600 mb-2 flex items-center">
+          <SyncIcon className="animate-spin h-4 w-4 mr-1" />
+          우선순위 저장 중...
+        </div>
+      )}
+      
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="goals-list">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="space-y-3"
+            >
+              {localGoals.map((goal, index) => (
+                <Draggable 
+                  key={goal.id} 
+                  draggableId={goal.id} 
+                  index={index}
+                  isDragDisabled={isUpdating}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`transition-shadow ${
+                        snapshot.isDragging ? 'shadow-lg' : 'shadow-sm'
+                      }`}
+                    >
+                      <GoalCard 
+                        goal={goal}
+                        dragHandleProps={provided.dragHandleProps}
+                        isDragging={snapshot.isDragging}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </div>
+  );
+};
+```
+
+### 개선된 GoalCard 컴포넌트
+```typescript
+// GoalCard.tsx
+const GoalCard: React.FC<{
+  goal: Goal;
+  dragHandleProps?: DraggableProvidedDragHandleProps;
+  isDragging?: boolean;
+}> = ({ goal, dragHandleProps, isDragging = false }) => {
+  const { handleStatusChange, handleFeedback, isUpdating } = useGoalActions();
+  
+  return (
+    <div 
+      className={`goal-card p-4 border rounded-lg bg-white ${
+        isDragging ? 'border-blue-400' : 'border-gray-200'
+      } ${goal.status === 'completed' ? 'bg-gray-50' : ''}`}
+    >
+      <div className="flex items-start">
+        <div 
+          {...dragHandleProps} 
+          className="drag-handle mr-2 cursor-grab text-gray-400 hover:text-gray-600"
+          aria-label="목표 순서 변경"
+        >
+          <DragHandleIcon className="h-5 w-5" />
+        </div>
+        
+        <div className="flex-1">
+          <div className="flex items-center mb-1">
+            <GoalStatusBadge status={goal.status} />
+            <span className="ml-auto text-sm text-gray-500">
+              우선순위: {goal.priority}
+            </span>
+          </div>
+          
+          <p className={`text-gray-800 ${goal.status === 'completed' ? 'line-through text-gray-500' : ''}`}>
+            {goal.content}
+          </p>
+          
+          <div className="mt-3 flex flex-wrap gap-2">
+            <GoalStatusControl 
+              goal={goal} 
+              onStatusChange={handleStatusChange}
+              isUpdating={isUpdating[goal.id]?.status || false}
+            />
+            
+            <GoalFeedbackControls
+              goalId={goal.id}
+              currentFeedback={goal.userFeedback}
+              onFeedback={handleFeedback}
+              isUpdating={isUpdating[goal.id]?.feedback || false}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 목표 상태 뱃지 컴포넌트
+const GoalStatusBadge: React.FC<{ status: GoalStatus }> = ({ status }) => {
+  const statusConfig = {
+    pending: { label: '대기중', className: 'bg-yellow-100 text-yellow-800' },
+    accepted: { label: '수락됨', className: 'bg-green-100 text-green-800' },
+    rejected: { label: '거부됨', className: 'bg-red-100 text-red-800' },
+    completed: { label: '완료됨', className: 'bg-blue-100 text-blue-800' }
+  };
+  
+  const { label, className } = statusConfig[status];
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}>
+      {label}
+    </span>
+  );
+};
+```
+
+### 목표 관리 커스텀 훅
+```typescript
+// useGoalActions.ts
+export const useGoalActions = () => {
+  const [isUpdating, setIsUpdating] = useState<Record<string, { 
+    status?: boolean;
+    feedback?: boolean;
+  }>>({});
+  
+  const handleStatusChange = async (goalId: string, newStatus: GoalStatus) => {
+    setIsUpdating(prev => ({
+      ...prev,
+      [goalId]: { ...prev[goalId], status: true }
+    }));
+    
+    try {
+      await api.goals.updateStatus(goalId, newStatus);
+      return true;
+    } catch (error) {
+      console.error('Status update failed:', error);
+      return false;
+    } finally {
+      setIsUpdating(prev => ({
+        ...prev,
+        [goalId]: { ...prev[goalId], status: false }
+      }));
+    }
+  };
+  
+  const handleFeedback = async (goalId: string, feedback: 'like' | 'dislike' | null) => {
+    setIsUpdating(prev => ({
+      ...prev,
+      [goalId]: { ...prev[goalId], feedback: true }
+    }));
+    
+    try {
+      await api.goals.provideFeedback(goalId, feedback);
+      return true;
+    } catch (error) {
+      console.error('Feedback submission failed:', error);
+      return false;
+    } finally {
+      setIsUpdating(prev => ({
+        ...prev,
+        [goalId]: { ...prev[goalId], feedback: false }
+      }));
+    }
+  };
+  
+  return {
+    isUpdating,
+    handleStatusChange,
+    handleFeedback
+  };
+};
+```
+
+### 모바일 및 접근성 최적화
+```typescript
+// GoalCardAccessibility.tsx - 접근성 강화 래퍼 컴포넌트
+const GoalCardAccessibility: React.FC<{ goal: Goal }> = ({ goal }) => {
+  // 키보드 네비게이션 핸들러
+  const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+  
+  // 모바일 터치 최적화
+  const touchProps = {
+    role: 'button',
+    tabIndex: 0,
+    style: { 
+      // 터치 영역 최소 44x44px 보장
+      minHeight: '44px',
+      minWidth: '44px'
+    }
+  };
+  
+  // 스크린 리더 지원
+  const getAriaLabel = (status: GoalStatus) => {
+    const statusLabels = {
+      pending: '대기 중인',
+      accepted: '수락된',
+      rejected: '거부된',
+      completed: '완료된'
+    };
+    
+    return `${statusLabels[status]} 목표: ${goal.content}`;
+  };
+  
+  return (
+    <div 
+      role="region"
+      aria-label={getAriaLabel(goal.status)}
+      className="goal-card-accessible"
+    >
+      {/* 기존 GoalCard 컴포넌트에 접근성 속성 추가 */}
+      <GoalCard 
+        goal={goal}
+        ariaProps={{
+          'aria-label': getAriaLabel(goal.status),
+          role: 'article'
+        }}
+        touchProps={touchProps}
+        keyboardProps={{
+          onKeyDown: handleKeyDown
+        }}
+      />
+    </div>
+  );
+};
+
+// 모바일 최적화 스타일
+const mobileOptimizedStyles = css`
+  @media (max-width: 640px) {
+    .goal-card {
+      padding: 16px 12px;
+    }
+    
+    .goal-status-controls {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .goal-status-button {
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    /* 터치 영역 간격 확보 */
+    .goal-feedback-controls button {
+      margin: 0 8px;
+    }
+  }
+`;
+```
+
+### 실시간 UI 업데이트 및 서버 연동
+```typescript
+// DreamDetailGoals.tsx
+const DreamDetailGoals: React.FC<{ dreamId: string }> = ({ dreamId }) => {
+  const { data: goals, isLoading, mutate } = useSWR(
+    `/api/dreams/${dreamId}/goals`,
+    () => api.goals.getByDreamId(dreamId)
+  );
+  
+  // 낙관적 UI 업데이트 + 서버 연동
+  const updateGoalStatus = async (goalId: string, newStatus: GoalStatus) => {
+    // 현재 데이터 복사
+    const currentGoals = [...(goals || [])];
+    
+    // 낙관적 UI 업데이트
+    const updatedGoals = currentGoals.map(goal => 
+      goal.id === goalId ? { ...goal, status: newStatus } : goal
+    );
+    
+    // SWR 캐시 즉시 업데이트
+    mutate(updatedGoals, false);
+    
+    try {
+      // 서버 요청
+      await api.goals.updateStatus(goalId, newStatus);
+      // 성공 시 최신 데이터로 갱신
+      mutate();
+    } catch (error) {
+      console.error('Status update failed:', error);
+      // 실패 시 원래 데이터로 복원
+      mutate(currentGoals, false);
+      throw error;
+    }
+  };
+  
+  const updateGoalPriorities = async (reorderedGoals: Goal[]) => {
+    // 현재 데이터 백업
+    const currentGoals = [...(goals || [])];
+    
+    // 낙관적 UI 업데이트
+    mutate(reorderedGoals, false);
+    
+    try {
+      // 서버에 우선순위 업데이트 요청
+      await api.goals.updatePriorities(
+        dreamId,
+        reorderedGoals.map((goal, index) => ({ 
+          id: goal.id, 
+          priority: index + 1 
+        }))
+      );
+      // 성공 시 최신 데이터 갱신
+      mutate();
+    } catch (error) {
+      console.error('Priority update failed:', error);
+      // 실패 시 원래 데이터로 복원
+      mutate(currentGoals, false);
+      throw error;
+    }
+  };
+  
+  if (isLoading) return <GoalListSkeleton />;
+  
+  return (
+    <div className="dream-goals-container">
+      <h2 className="text-xl font-semibold mb-4">목표 관리</h2>
+      
+      {goals?.length === 0 ? (
+        <EmptyGoalState dreamId={dreamId} onGoalsGenerated={mutate} />
+      ) : (
+        <GoalPriorityManager
+          goals={goals || []}
+          onPriorityChange={updateGoalPriorities}
+        />
+      )}
+    </div>
+  );
+};
+```
+
+### 성능 최적화 및 사용자 경험 향상
+- 목표 상태 변경 시 애니메이션 효과 추가
+- 목표 목록이 많을 경우 가상화(virtualization) 적용
+- 목표 관리 작업 중 실시간 피드백 제공
+- 오프라인 지원을 위한 상태 캐싱 및 동기화 메커니즘
+</info added on 2025-05-20T09:15:42.000Z>
+</info added on 2025-05-03T08:43:40.904Z>
 

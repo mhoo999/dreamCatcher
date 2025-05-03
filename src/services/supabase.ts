@@ -97,4 +97,39 @@ export async function deleteGoal(id: string): Promise<void> {
     .delete()
     .eq('id', id);
   if (error) throw error;
+}
+
+export async function fetchGoalById(id: string): Promise<Goal | null> {
+  const { data, error } = await supabase
+    .from('goals')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) {
+    console.error('Error fetching goal:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function setGoalPriority(id: string, priority: string): Promise<Goal> {
+  const { data, error } = await supabase
+    .from('goals')
+    .update({ priority })
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function rejectGoal(id: string): Promise<Goal> {
+  const { data, error } = await supabase
+    .from('goals')
+    .update({ status: 'rejected' })
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
 } 
