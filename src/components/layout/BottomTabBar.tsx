@@ -14,7 +14,7 @@ const BottomTabBar: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="max-w-app mx-auto fixed bottom-0 left-0 right-0 flex justify-between items-center bg-white rounded-t-tab shadow-tab py-2 px-4 z-50">
+    <nav className="w-full max-w-app mx-auto fixed bottom-0 left-0 right-0 flex justify-between items-center bg-white rounded-t-tab shadow-tab py-2 px-4 z-50">
       {tabs.map(tab => {
         const isActive = location.pathname.startsWith(tab.path);
         const Icon = tab.icon;

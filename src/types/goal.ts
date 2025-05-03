@@ -1,10 +1,11 @@
+export type GoalStatus = 'proposed' | 'accepted' | 'rejected' | 'completed' | 'in_progress';
+
 export interface Goal {
   id: string;
   dream_id: string;
-  user_id: string;
   title: string;
   completed: boolean;
-  status: 'proposed' | 'accepted' | 'rejected' | 'completed';
+  status: GoalStatus; // goal_status ENUM과 일치
   created_at: string;
   updated_at: string;
 } 

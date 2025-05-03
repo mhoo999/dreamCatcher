@@ -3,48 +3,140 @@
 # Status: pending
 # Dependencies: 2
 # Priority: high
-# Description: 사용자 꿈을 기반으로 개인화된 목표를 생성하기 위한 OpenAI/Claude API 통합
+# Description: 사용자 꿈을 기반으로 개인화된 목표를 생성하기 위한 Perplexity API 통합
 # Details:
-OpenAI/Claude API 통합을 설정합니다. 사용자 꿈 데이터를 처리하고 적절한 일일/주간/월간 목표를 생성하는 서비스를 만듭니다. Supabase에서 목표 데이터 모델을 구현합니다. 품질 목표 제안을 보장하기 위한 AI 프롬프트 엔지니어링을 설계합니다. 사용자가 제안된 목표를 편집, 우선순위 지정 또는 거부할 수 있는 옵션이 있는 UI를 구축합니다. 시간 프레임(일일/주간/월간)별 목표 분류를 포함합니다.
+Perplexity API 통합을 설정합니다. 사용자 꿈 데이터를 처리하고 적절한 목표를 생성하는 서비스를 만듭니다. Supabase에서 목표 데이터 모델을 구현하고 dreamId로 꿈과 연결합니다. 품질 목표 제안을 보장하기 위한 AI 프롬프트 엔지니어링을 설계합니다. 사용자가 제안된 목표를 편집, 우선순위 지정 또는 거부할 수 있는 옵션이 있는 UI를 구축합니다.
 
 # Test Strategy:
 샘플 꿈 입력으로 API 통합을 테스트합니다. 목표 생성 품질 및 관련성을 확인합니다. 최소한의 또는 비정상적인 꿈 설명이 있는 엣지 케이스를 테스트합니다. 데이터베이스에서 목표 저장 및 검색을 검증합니다.
 
 # Subtasks:
-## 1. OpenAI/Claude API 연동 및 기본 통신 설정 [in-progress]
+## 1. Perplexity API 연동 및 기본 통신 설정 [done]
 ### Dependencies: None
 ### Description: AI 서비스와의 통신을 위한 기본 인프라 구축 및 API 연동 설정
 ### Details:
-1. OpenAI와 Claude API 키 발급 및 환경 변수 설정
+1. Perplexity API 키 발급 및 환경 변수 설정
 2. API 클라이언트 래퍼 클래스 구현 (요청 전송, 응답 처리, 오류 처리)
 3. API 호출 제한 및 비용 관리를 위한 레이트 리미팅 구현
 4. 기본 프롬프트 템플릿 구조 설계
 5. 간단한 테스트 엔드포인트 구현으로 API 연결 확인
 6. 테스트: 기본 프롬프트로 API 응답 확인 및 응답 형식 검증
 
-## 2. Supabase 목표 데이터 모델 설계 및 구현 [pending]
+## 2. Supabase 꿈과 목표 데이터 모델 설계 및 구현 [in-progress]
 ### Dependencies: None
 ### Description: 사용자 꿈과 생성된 목표를 저장하기 위한 데이터베이스 스키마 설계 및 구현
 ### Details:
 1. 사용자, 꿈, 목표 간의 관계를 정의하는 ERD 설계
-2. Supabase에 필요한 테이블 생성 (users, dreams, goals, goal_categories)
-3. 목표 테이블에 시간 프레임(일일/주간/월간) 필드 추가
-4. 목표 상태 관리를 위한 필드 추가 (제안됨, 수락됨, 거부됨, 완료됨 등)
-5. 필요한 인덱스 및 외래 키 제약 조건 설정
-6. TypeScript 인터페이스/타입 정의
-7. 테스트: CRUD 작업을 통한 데이터 모델 검증
+2. Supabase에 필요한 테이블 생성 (users, dreams, goals)
+3. Dream 테이블에 deadline 필드 추가
+4. Goal 테이블에 dreamId 외래 키 필드 추가하여 꿈과 목표 연결
+5. 목표 상태 관리를 위한 필드 추가 (제안됨, 수락됨, 거부됨, 완료됨 등)
+6. 필요한 인덱스 및 외래 키 제약 조건 설정
+7. TypeScript 인터페이스/타입 정의
+8. 테스트: CRUD 작업을 통한 데이터 모델 검증
 
-## 3. AI 프롬프트 엔지니어링 및 목표 생성 로직 개발 [pending]
+<info added on 2025-05-03T07:57:11.853Z>
+## Supabase 데이터 모델 구현 상세 정보
+
+### 1. 보안 정책(RLS) 설정
+```sql
+-- dreams 테이블 RLS
+alter table dreams enable row level security;
+create policy "사용자는 자신의 꿈만 볼 수 있음" on dreams
+  for select using (auth.uid() = user_id);
+create policy "사용자는 자신의 꿈만 생성할 수 있음" on dreams
+  for insert with check (auth.uid() = user_id);
+create policy "사용자는 자신의 꿈만 수정할 수 있음" on dreams
+  for update using (auth.uid() = user_id);
+create policy "사용자는 자신의 꿈만 삭제할 수 있음" on dreams
+  for delete using (auth.uid() = user_id);
+
+-- goals 테이블 RLS
+alter table goals enable row level security;
+create policy "사용자는 자신의 꿈에 연결된 목표만 접근 가능" on goals
+  for all using (auth.uid() = (select user_id from dreams where id = goals.dream_id));
+```
+
+### 2. 인덱스 설정
+```sql
+-- 성능 최적화를 위한 인덱스
+create index dreams_user_id_idx on dreams(user_id);
+create index goals_dream_id_idx on goals(dream_id);
+create index goals_status_idx on goals(status);
+```
+
+### 3. 목표 상태 관리를 위한 ENUM 타입
+```sql
+create type goal_status as enum ('proposed', 'accepted', 'rejected', 'completed', 'in_progress');
+-- goals 테이블의 status 필드 타입 변경
+alter table goals alter column status type goal_status using status::goal_status;
+```
+
+### 4. 트리거 함수 구현 (updated_at 자동 갱신)
+```sql
+create or replace function update_modified_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger update_dreams_modtime
+before update on dreams
+for each row execute function update_modified_column();
+
+create trigger update_goals_modtime
+before update on goals
+for each row execute function update_modified_column();
+```
+
+### 5. 데이터 검증 함수 예시
+```typescript
+// src/utils/validation.ts
+export const validateDream = (dream: Partial<Dream>): boolean => {
+  if (!dream.title || dream.title.trim().length < 3) return false;
+  if (dream.deadline && new Date(dream.deadline) < new Date()) return false;
+  return true;
+};
+
+export const validateGoal = (goal: Partial<Goal>): boolean => {
+  if (!goal.title || goal.title.trim().length < 3) return false;
+  if (!goal.dream_id) return false;
+  return true;
+};
+```
+
+### 6. 테스트 쿼리 예시
+```sql
+-- 특정 사용자의 모든 꿈과 관련 목표 조회
+select d.*, 
+  (select json_agg(g.*) from goals g where g.dream_id = d.id) as goals
+from dreams d
+where d.user_id = '[USER_ID]';
+
+-- 상태별 목표 통계
+select d.title as dream_title, 
+  count(g.id) filter (where g.status = 'proposed') as proposed_goals,
+  count(g.id) filter (where g.status = 'accepted') as accepted_goals,
+  count(g.id) filter (where g.status = 'completed') as completed_goals
+from dreams d
+left join goals g on d.id = g.dream_id
+where d.user_id = '[USER_ID]'
+group by d.id;
+```
+</info added on 2025-05-03T07:57:11.853Z>
+
+## 3. AI 프롬프트 엔지니어링 및 목표 생성 로직 개발 [done]
 ### Dependencies: 3.1, 3.2
 ### Description: 사용자 꿈 데이터를 분석하고 적절한 목표를 생성하기 위한 AI 프롬프트 설계
 ### Details:
 1. 효과적인 목표 생성을 위한 프롬프트 템플릿 설계
 2. 꿈 데이터에서 핵심 주제와 패턴을 추출하는 프롬프트 개발
-3. 일일/주간/월간 목표 생성을 위한 별도 프롬프트 최적화
-4. SMART 목표 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시간 제한)을 적용한 프롬프트 구성
-5. 목표 품질 향상을 위한 프롬프트 반복 테스트 및 개선
-6. 응답 파싱 및 구조화 로직 구현
-7. 테스트: 다양한 꿈 시나리오에 대한 목표 생성 품질 평가
+3. SMART 목표 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시간 제한)을 적용한 프롬프트 구성
+4. 목표 품질 향상을 위한 프롬프트 반복 테스트 및 개선
+5. 응답 파싱 및 구조화 로직 구현
+6. 테스트: 다양한 꿈 시나리오에 대한 목표 생성 품질 평가
 
 ## 4. 꿈 데이터 처리 및 목표 생성 서비스 구현 [pending]
 ### Dependencies: 3.1, 3.2, 3.3
@@ -53,7 +145,7 @@ OpenAI/Claude API 통합을 설정합니다. 사용자 꿈 데이터를 처리�
 1. 꿈 데이터 입력 및 처리를 위한 서비스 레이어 구현
 2. 꿈 데이터를 AI 프롬프트에 통합하는 로직 개발
 3. AI 응답에서 목표 데이터 추출 및 구조화
-4. 생성된 목표를 Supabase에 저장하는 기능 구현
+4. 생성된 목표를 Supabase에 저장하고 dreamId로 연결하는 기능 구현
 5. 목표 중복 방지 및 품질 검증 로직 추가
 6. 비동기 처리를 위한 작업 큐 구현 (선택적)
 7. 테스트: 전체 파이프라인 통합 테스트 (꿈 입력부터 목표 저장까지)
@@ -62,20 +154,21 @@ OpenAI/Claude API 통합을 설정합니다. 사용자 꿈 데이터를 처리�
 ### Dependencies: 3.2, 3.4
 ### Description: 목표 조회, 편집, 우선순위 지정, 거부 등을 위한 RESTful API 개발
 ### Details:
-1. 사용자별 목표 조회 엔드포인트 구현 (시간 프레임별 필터링 포함)
-2. 목표 상세 조회 엔드포인트 구현
-3. 목표 수정 엔드포인트 구현 (사용자 편집 지원)
-4. 목표 상태 변경 엔드포인트 구현 (수락, 거부, 완료 등)
-5. 목표 우선순위 지정 엔드포인트 구현
-6. 목표 삭제 엔드포인트 구현
-7. API 인증 및 권한 검사 로직 추가
-8. 테스트: Postman/Insomnia를 사용한 API 엔드포인트 테스트
+1. 모든 목표 조회 엔드포인트 구현
+2. 꿈별 목표 조회 엔드포인트 구현 (dreamId 기준 필터링)
+3. 목표 상세 조회 엔드포인트 구현
+4. 목표 수정 엔드포인트 구현 (사용자 편집 지원)
+5. 목표 상태 변경 엔드포인트 구현 (수락, 거부, 완료 등)
+6. 목표 우선순위 지정 엔드포인트 구현
+7. 목표 삭제 엔드포인트 구현
+8. API 인증 및 권한 검사 로직 추가
+9. 테스트: Postman/Insomnia를 사용한 API 엔드포인트 테스트
 
 ## 6. 목표 제안 및 관리 UI 구현 [pending]
 ### Dependencies: 3.5
 ### Description: 사용자가 제안된 목표를 확인하고 관리할 수 있는 사용자 인터페이스 개발
 ### Details:
-1. 시간 프레임별(일일/주간/월간) 목표 탭 UI 설계 및 구현
+1. 꿈 상세 페이지에서 해당 꿈의 목표 목록 UI 구현
 2. 목표 카드 컴포넌트 개발 (목표 내용, 상태, 우선순위 표시)
 3. 목표 편집 모달/페이지 구현
 4. 목표 수락/거부/완료 기능 UI 구현

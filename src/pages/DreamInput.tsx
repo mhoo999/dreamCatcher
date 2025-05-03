@@ -64,59 +64,57 @@ const DreamInput: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-8 w-full">
-      <div className="w-full px-4">
-        <Card>
-          <h2 className="text-lg font-semibold text-primary mb-4">새로운 꿈 입력</h2>
-          <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="꿈 제목"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-            />
-            <textarea
-              className="border rounded-lg px-3 py-2 text-base min-h-[80px] focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="꿈에 대한 설명"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="태그 (쉼표로 구분)"
-              value={tags}
-              onChange={e => setTags(e.target.value)}
-            />
-            <input
-              type="date"
-              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="마감일 (선택)"
-              value={deadline}
-              onChange={e => setDeadline(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="bg-gradient-to-br from-primary to-secondary text-white font-bold rounded-lg py-2 mt-2 shadow-card hover:opacity-90 transition"
-              disabled={aiLoading}
-            >
-              {aiLoading ? 'AI 목표 생성 중...' : '저장하기'}
-            </button>
-          </form>
-          {success && <div className="text-green-500 mt-2">꿈이 저장되었습니다!</div>}
-          {error && <div className="text-red-500 mt-2">{error}</div>}
-          {aiLoading && <div className="text-blue-500 mt-2">AI 목표를 생성 중입니다...</div>}
-          {aiGoals && (
-            <div className="mt-4 p-3 bg-gray-50 rounded text-sm whitespace-pre-line border border-gray-200">
-              <div className="font-semibold text-primary mb-1">AI가 제안한 목표</div>
-              {aiGoals}
-            </div>
-          )}
-        </Card>
-      </div>
+    <div className="max-w-[430px] mx-auto w-full px-4 py-8 flex flex-col items-center justify-center">
+      <Card>
+        <h2 className="text-lg font-semibold text-primary mb-4">새로운 꿈 입력</h2>
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="꿈 제목"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            required
+          />
+          <textarea
+            className="border rounded-lg px-3 py-2 text-base min-h-[80px] focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="꿈에 대한 설명"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            required
+          />
+          <input
+            type="text"
+            className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="태그 (쉼표로 구분)"
+            value={tags}
+            onChange={e => setTags(e.target.value)}
+          />
+          <input
+            type="date"
+            className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="마감일 (선택)"
+            value={deadline}
+            onChange={e => setDeadline(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="bg-gradient-to-br from-primary to-secondary text-white font-bold rounded-lg py-2 mt-2 shadow-card hover:opacity-90 transition"
+            disabled={aiLoading}
+          >
+            {aiLoading ? 'AI 목표 생성 중...' : '저장하기'}
+          </button>
+        </form>
+        {success && <div className="text-green-500 mt-2">꿈이 저장되었습니다!</div>}
+        {error && <div className="text-red-500 mt-2">{error}</div>}
+        {aiLoading && <div className="text-blue-500 mt-2">AI 목표를 생성 중입니다...</div>}
+        {aiGoals && (
+          <div className="mt-4 p-3 bg-gray-50 rounded text-sm whitespace-pre-line border border-gray-200">
+            <div className="font-semibold text-primary mb-1">AI가 제안한 목표</div>
+            {aiGoals}
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

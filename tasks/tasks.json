@@ -94,31 +94,31 @@
     {
       "id": 3,
       "title": "[MVP] AI 기반 목표 제안 시스템 개발",
-      "description": "사용자 꿈을 기반으로 개인화된 목표를 생성하기 위한 OpenAI/Claude API 통합",
+      "description": "사용자 꿈을 기반으로 개인화된 목표를 생성하기 위한 Perplexity API 통합",
       "status": "pending",
       "dependencies": [
         2
       ],
       "priority": "high",
-      "details": "OpenAI/Claude API 통합을 설정합니다. 사용자 꿈 데이터를 처리하고 적절한 일일/주간/월간 목표를 생성하는 서비스를 만듭니다. Supabase에서 목표 데이터 모델을 구현합니다. 품질 목표 제안을 보장하기 위한 AI 프롬프트 엔지니어링을 설계합니다. 사용자가 제안된 목표를 편집, 우선순위 지정 또는 거부할 수 있는 옵션이 있는 UI를 구축합니다. 시간 프레임(일일/주간/월간)별 목표 분류를 포함합니다.",
+      "details": "Perplexity API 통합을 설정합니다. 사용자 꿈 데이터를 처리하고 적절한 목표를 생성하는 서비스를 만듭니다. Supabase에서 목표 데이터 모델을 구현하고 dreamId로 꿈과 연결합니다. 품질 목표 제안을 보장하기 위한 AI 프롬프트 엔지니어링을 설계합니다. 사용자가 제안된 목표를 편집, 우선순위 지정 또는 거부할 수 있는 옵션이 있는 UI를 구축합니다.",
       "testStrategy": "샘플 꿈 입력으로 API 통합을 테스트합니다. 목표 생성 품질 및 관련성을 확인합니다. 최소한의 또는 비정상적인 꿈 설명이 있는 엣지 케이스를 테스트합니다. 데이터베이스에서 목표 저장 및 검색을 검증합니다.",
       "subtasks": [
         {
           "id": 1,
-          "title": "OpenAI/Claude API 연동 및 기본 통신 설정",
+          "title": "Perplexity API 연동 및 기본 통신 설정",
           "description": "AI 서비스와의 통신을 위한 기본 인프라 구축 및 API 연동 설정",
           "dependencies": [],
-          "details": "1. OpenAI와 Claude API 키 발급 및 환경 변수 설정\n2. API 클라이언트 래퍼 클래스 구현 (요청 전송, 응답 처리, 오류 처리)\n3. API 호출 제한 및 비용 관리를 위한 레이트 리미팅 구현\n4. 기본 프롬프트 템플릿 구조 설계\n5. 간단한 테스트 엔드포인트 구현으로 API 연결 확인\n6. 테스트: 기본 프롬프트로 API 응답 확인 및 응답 형식 검증",
-          "status": "in-progress",
+          "details": "1. Perplexity API 키 발급 및 환경 변수 설정\n2. API 클라이언트 래퍼 클래스 구현 (요청 전송, 응답 처리, 오류 처리)\n3. API 호출 제한 및 비용 관리를 위한 레이트 리미팅 구현\n4. 기본 프롬프트 템플릿 구조 설계\n5. 간단한 테스트 엔드포인트 구현으로 API 연결 확인\n6. 테스트: 기본 프롬프트로 API 응답 확인 및 응답 형식 검증",
+          "status": "done",
           "parentTaskId": 3
         },
         {
           "id": 2,
-          "title": "Supabase 목표 데이터 모델 설계 및 구현",
+          "title": "Supabase 꿈과 목표 데이터 모델 설계 및 구현",
           "description": "사용자 꿈과 생성된 목표를 저장하기 위한 데이터베이스 스키마 설계 및 구현",
           "dependencies": [],
-          "details": "1. 사용자, 꿈, 목표 간의 관계를 정의하는 ERD 설계\n2. Supabase에 필요한 테이블 생성 (users, dreams, goals, goal_categories)\n3. 목표 테이블에 시간 프레임(일일/주간/월간) 필드 추가\n4. 목표 상태 관리를 위한 필드 추가 (제안됨, 수락됨, 거부됨, 완료됨 등)\n5. 필요한 인덱스 및 외래 키 제약 조건 설정\n6. TypeScript 인터페이스/타입 정의\n7. 테스트: CRUD 작업을 통한 데이터 모델 검증",
-          "status": "pending",
+          "details": "1. 사용자, 꿈, 목표 간의 관계를 정의하는 ERD 설계\n2. Supabase에 필요한 테이블 생성 (users, dreams, goals)\n3. Dream 테이블에 deadline 필드 추가\n4. Goal 테이블에 dreamId 외래 키 필드 추가하여 꿈과 목표 연결\n5. 목표 상태 관리를 위한 필드 추가 (제안됨, 수락됨, 거부됨, 완료됨 등)\n6. 필요한 인덱스 및 외래 키 제약 조건 설정\n7. TypeScript 인터페이스/타입 정의\n8. 테스트: CRUD 작업을 통한 데이터 모델 검증\n\n<info added on 2025-05-03T07:57:11.853Z>\n## Supabase 데이터 모델 구현 상세 정보\n\n### 1. 보안 정책(RLS) 설정\n```sql\n-- dreams 테이블 RLS\nalter table dreams enable row level security;\ncreate policy \"사용자는 자신의 꿈만 볼 수 있음\" on dreams\n  for select using (auth.uid() = user_id);\ncreate policy \"사용자는 자신의 꿈만 생성할 수 있음\" on dreams\n  for insert with check (auth.uid() = user_id);\ncreate policy \"사용자는 자신의 꿈만 수정할 수 있음\" on dreams\n  for update using (auth.uid() = user_id);\ncreate policy \"사용자는 자신의 꿈만 삭제할 수 있음\" on dreams\n  for delete using (auth.uid() = user_id);\n\n-- goals 테이블 RLS\nalter table goals enable row level security;\ncreate policy \"사용자는 자신의 꿈에 연결된 목표만 접근 가능\" on goals\n  for all using (auth.uid() = (select user_id from dreams where id = goals.dream_id));\n```\n\n### 2. 인덱스 설정\n```sql\n-- 성능 최적화를 위한 인덱스\ncreate index dreams_user_id_idx on dreams(user_id);\ncreate index goals_dream_id_idx on goals(dream_id);\ncreate index goals_status_idx on goals(status);\n```\n\n### 3. 목표 상태 관리를 위한 ENUM 타입\n```sql\ncreate type goal_status as enum ('proposed', 'accepted', 'rejected', 'completed', 'in_progress');\n-- goals 테이블의 status 필드 타입 변경\nalter table goals alter column status type goal_status using status::goal_status;\n```\n\n### 4. 트리거 함수 구현 (updated_at 자동 갱신)\n```sql\ncreate or replace function update_modified_column()\nreturns trigger as $$\nbegin\n  new.updated_at = now();\n  return new;\nend;\n$$ language plpgsql;\n\ncreate trigger update_dreams_modtime\nbefore update on dreams\nfor each row execute function update_modified_column();\n\ncreate trigger update_goals_modtime\nbefore update on goals\nfor each row execute function update_modified_column();\n```\n\n### 5. 데이터 검증 함수 예시\n```typescript\n// src/utils/validation.ts\nexport const validateDream = (dream: Partial<Dream>): boolean => {\n  if (!dream.title || dream.title.trim().length < 3) return false;\n  if (dream.deadline && new Date(dream.deadline) < new Date()) return false;\n  return true;\n};\n\nexport const validateGoal = (goal: Partial<Goal>): boolean => {\n  if (!goal.title || goal.title.trim().length < 3) return false;\n  if (!goal.dream_id) return false;\n  return true;\n};\n```\n\n### 6. 테스트 쿼리 예시\n```sql\n-- 특정 사용자의 모든 꿈과 관련 목표 조회\nselect d.*, \n  (select json_agg(g.*) from goals g where g.dream_id = d.id) as goals\nfrom dreams d\nwhere d.user_id = '[USER_ID]';\n\n-- 상태별 목표 통계\nselect d.title as dream_title, \n  count(g.id) filter (where g.status = 'proposed') as proposed_goals,\n  count(g.id) filter (where g.status = 'accepted') as accepted_goals,\n  count(g.id) filter (where g.status = 'completed') as completed_goals\nfrom dreams d\nleft join goals g on d.id = g.dream_id\nwhere d.user_id = '[USER_ID]'\ngroup by d.id;\n```\n</info added on 2025-05-03T07:57:11.853Z>",
+          "status": "in-progress",
           "parentTaskId": 3
         },
         {
@@ -129,8 +129,8 @@
             1,
             2
           ],
-          "details": "1. 효과적인 목표 생성을 위한 프롬프트 템플릿 설계\n2. 꿈 데이터에서 핵심 주제와 패턴을 추출하는 프롬프트 개발\n3. 일일/주간/월간 목표 생성을 위한 별도 프롬프트 최적화\n4. SMART 목표 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시간 제한)을 적용한 프롬프트 구성\n5. 목표 품질 향상을 위한 프롬프트 반복 테스트 및 개선\n6. 응답 파싱 및 구조화 로직 구현\n7. 테스트: 다양한 꿈 시나리오에 대한 목표 생성 품질 평가",
-          "status": "pending",
+          "details": "1. 효과적인 목표 생성을 위한 프롬프트 템플릿 설계\n2. 꿈 데이터에서 핵심 주제와 패턴을 추출하는 프롬프트 개발\n3. SMART 목표 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시간 제한)을 적용한 프롬프트 구성\n4. 목표 품질 향상을 위한 프롬프트 반복 테스트 및 개선\n5. 응답 파싱 및 구조화 로직 구현\n6. 테스트: 다양한 꿈 시나리오에 대한 목표 생성 품질 평가",
+          "status": "done",
           "parentTaskId": 3
         },
         {
@@ -142,7 +142,7 @@
             2,
             3
           ],
-          "details": "1. 꿈 데이터 입력 및 처리를 위한 서비스 레이어 구현\n2. 꿈 데이터를 AI 프롬프트에 통합하는 로직 개발\n3. AI 응답에서 목표 데이터 추출 및 구조화\n4. 생성된 목표를 Supabase에 저장하는 기능 구현\n5. 목표 중복 방지 및 품질 검증 로직 추가\n6. 비동기 처리를 위한 작업 큐 구현 (선택적)\n7. 테스트: 전체 파이프라인 통합 테스트 (꿈 입력부터 목표 저장까지)",
+          "details": "1. 꿈 데이터 입력 및 처리를 위한 서비스 레이어 구현\n2. 꿈 데이터를 AI 프롬프트에 통합하는 로직 개발\n3. AI 응답에서 목표 데이터 추출 및 구조화\n4. 생성된 목표를 Supabase에 저장하고 dreamId로 연결하는 기능 구현\n5. 목표 중복 방지 및 품질 검증 로직 추가\n6. 비동기 처리를 위한 작업 큐 구현 (선택적)\n7. 테스트: 전체 파이프라인 통합 테스트 (꿈 입력부터 목표 저장까지)",
           "status": "pending",
           "parentTaskId": 3
         },
@@ -154,7 +154,7 @@
             2,
             4
           ],
-          "details": "1. 사용자별 목표 조회 엔드포인트 구현 (시간 프레임별 필터링 포함)\n2. 목표 상세 조회 엔드포인트 구현\n3. 목표 수정 엔드포인트 구현 (사용자 편집 지원)\n4. 목표 상태 변경 엔드포인트 구현 (수락, 거부, 완료 등)\n5. 목표 우선순위 지정 엔드포인트 구현\n6. 목표 삭제 엔드포인트 구현\n7. API 인증 및 권한 검사 로직 추가\n8. 테스트: Postman/Insomnia를 사용한 API 엔드포인트 테스트",
+          "details": "1. 모든 목표 조회 엔드포인트 구현\n2. 꿈별 목표 조회 엔드포인트 구현 (dreamId 기준 필터링)\n3. 목표 상세 조회 엔드포인트 구현\n4. 목표 수정 엔드포인트 구현 (사용자 편집 지원)\n5. 목표 상태 변경 엔드포인트 구현 (수락, 거부, 완료 등)\n6. 목표 우선순위 지정 엔드포인트 구현\n7. 목표 삭제 엔드포인트 구현\n8. API 인증 및 권한 검사 로직 추가\n9. 테스트: Postman/Insomnia를 사용한 API 엔드포인트 테스트",
           "status": "pending",
           "parentTaskId": 3
         },
@@ -165,7 +165,7 @@
           "dependencies": [
             5
           ],
-          "details": "1. 시간 프레임별(일일/주간/월간) 목표 탭 UI 설계 및 구현\n2. 목표 카드 컴포넌트 개발 (목표 내용, 상태, 우선순위 표시)\n3. 목표 편집 모달/페이지 구현\n4. 목표 수락/거부/완료 기능 UI 구현\n5. 목표 우선순위 드래그 앤 드롭 기능 구현\n6. 새로운 목표 제안 요청 UI 구현\n7. 반응형 디자인 적용 (모바일/데스크톱)\n8. 테스트: 사용자 시나리오 기반 UI 테스트 및 사용성 평가",
+          "details": "1. 꿈 상세 페이지에서 해당 꿈의 목표 목록 UI 구현\n2. 목표 카드 컴포넌트 개발 (목표 내용, 상태, 우선순위 표시)\n3. 목표 편집 모달/페이지 구현\n4. 목표 수락/거부/완료 기능 UI 구현\n5. 목표 우선순위 드래그 앤 드롭 기능 구현\n6. 새로운 목표 제안 요청 UI 구현\n7. 반응형 디자인 적용 (모바일/데스크톱)\n8. 테스트: 사용자 시나리오 기반 UI 테스트 및 사용성 평가",
           "status": "pending",
           "parentTaskId": 3
         }
@@ -233,7 +233,7 @@
           "dependencies": [
             4
           ],
-          "details": "1. Supabase 데이터베이스에 시각화 데이터를 저장할 테이블 설계\n2. 저장 기능 구현 (현재 캔버스 상태를 JSON으로 변환하여 저장)\n3. 자동 저장 기능 구현 (일정 시간마다 또는 변경 시)\n4. 저장된 시각화 목록 조회 기능 구현\n5. 저장된 시각화 불러오기 기능 구현\n6. 테스트: 시각화 저장 후 다시 불러왔을 때 모든 요소와 속성이 정확히 복원되는지 확인",
+          "details": "1. Dream 테이블에 시각화 데이터를 저장할 필드 추가\n2. 저장 기능 구현 (현재 캔버스 상태를 JSON으로 변환하여 저장)\n3. 자동 저장 기능 구현 (일정 시간마다 또는 변경 시)\n4. 저장된 시각화 불러오기 기능 구현\n5. 테스트: 시각화 저장 후 다시 불러왔을 때 모든 요소와 속성이 정확히 복원되는지 확인",
           "status": "pending",
           "parentTaskId": 4
         },
@@ -260,8 +260,65 @@
         3
       ],
       "priority": "high",
-      "details": "일일, 주간 및 월간 목표에 대한 뷰를 설계하고 구현합니다. 목표 완료 추적을 위한 대화형 체크리스트를 만듭니다. 진행 시각화 컴포넌트(진행 막대, 차트)를 구축합니다. 목표 편집, 삭제 및 상태 업데이트 기능을 구현합니다. 목표에 대한 필터링 및 정렬 옵션을 추가합니다. 완료 상태 및 기록을 추적하도록 목표 모델을 업데이트합니다.",
-      "testStrategy": "목표 CRUD 작업을 테스트합니다. 진행 추적 정확도를 확인합니다. 많은 목표가 있는 UI 응답성을 테스트합니다. 목표 상태 업데이트가 데이터베이스 및 UI에 반영되는지 검증합니다."
+      "details": "전체 목표 목록과 꿈별 목표 목록을 볼 수 있는 뷰를 설계하고 구현합니다. 목표 완료 추적을 위한 대화형 체크리스트를 만듭니다. 진행 시각화 컴포넌트(진행 막대, 차트)를 구축합니다. 목표 편집, 삭제 및 상태 업데이트 기능을 구현합니다. 목표에 대한 필터링 및 정렬 옵션을 추가합니다. 완료 상태 및 기록을 추적하도록 목표 모델을 업데이트합니다.",
+      "testStrategy": "목표 CRUD 작업을 테스트합니다. 진행 추적 정확도를 확인합니다. 많은 목표가 있는 UI 응답성을 테스트합니다. 목표 상태 업데이트가 데이터베이스 및 UI에 반영되는지 검증합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "목표 목록 UI 구현",
+          "description": "전체 목표 목록과 꿈별 목표 목록을 볼 수 있는 UI 컴포넌트를 구현합니다.",
+          "dependencies": [],
+          "details": "1. 목표 탭에서 모든 목표를 보여주는 목록 컴포넌트 구현\n2. 꿈 상세 페이지에서 해당 꿈의 목표만 보여주는 목록 컴포넌트 구현\n3. 목표 카드 컴포넌트 디자인 및 구현 (목표 내용, 상태, 진행률 표시)\n4. 목표 필터링 기능 구현 (완료/미완료, 날짜별 등)\n5. 목표 정렬 기능 구현 (생성일, 마감일, 우선순위 등)\n6. 페이지네이션 또는 무한 스크롤 구현\n7. 테스트: 다양한 필터 및 정렬 옵션으로 목표 목록이 올바르게 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 2,
+          "title": "목표 체크리스트 및 진행률 UI 구현",
+          "description": "목표 완료 추적을 위한 체크리스트와 진행률 시각화 컴포넌트를 개발합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 목표 체크리스트 컴포넌트 구현 (체크박스, 완료 상태 토글)\n2. 진행률 표시 컴포넌트 구현 (프로그레스 바)\n3. 목표 완료 시 시각적 피드백 제공 (애니메이션, 색상 변경 등)\n4. 목표 상태 변경 시 실시간 UI 업데이트 구현\n5. 테스트: 체크리스트 항목 완료/미완료 토글 시 진행률이 올바르게 업데이트되는지 확인",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 3,
+          "title": "목표 CRUD 기능 구현",
+          "description": "목표 생성, 조회, 수정, 삭제 기능을 위한 UI 및 API 연동을 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 목표 생성 폼/모달 구현\n2. 목표 상세 보기 페이지/모달 구현\n3. 목표 편집 폼/모달 구현\n4. 목표 삭제 확인 대화상자 구현\n5. 각 CRUD 작업에 대한 API 연동 구현\n6. 유효성 검사 및 오류 처리 구현\n7. 테스트: 모든 CRUD 작업이 UI와 데이터베이스에 올바르게 반영되는지 확인",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 4,
+          "title": "목표 상태 관리 기능 구현",
+          "description": "목표의 상태(진행 중, 완료 등)를 관리하고 업데이트하는 기능을 구현합니다.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "1. 목표 상태 모델 정의 (진행 중, 완료, 지연됨 등)\n2. 상태 변경 UI 컴포넌트 구현 (드롭다운, 버튼 등)\n3. 상태 변경 API 연동 구현\n4. 상태에 따른 시각적 표시 구현 (색상, 아이콘 등)\n5. 상태 변경 히스토리 추적 기능 구현 (선택적)\n6. 테스트: 상태 변경이 UI와 데이터베이스에 올바르게 반영되는지 확인",
+          "status": "pending",
+          "parentTaskId": 5
+        },
+        {
+          "id": 5,
+          "title": "목표 데이터 모델 확장 및 API 업데이트",
+          "description": "목표 완료 상태 및 진행률 추적을 위해 데이터 모델을 확장하고 API를 업데이트합니다.",
+          "dependencies": [
+            3,
+            4
+          ],
+          "details": "1. Goal 테이블에 진행률(progress) 필드 추가\n2. Goal 테이블에 완료 날짜(completedAt) 필드 추가\n3. Goal 테이블에 상태(status) 필드 추가 또는 확장\n4. 진행률 및 상태 업데이트를 위한 API 엔드포인트 구현\n5. 목표 완료 시 completedAt 자동 설정 로직 구현\n6. 테스트: 데이터 모델 변경 후 API가 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 5
+        }
+      ]
     },
     {
       "id": 6,
@@ -272,8 +329,76 @@
         5
       ],
       "priority": "medium",
-      "details": "뽀모도로 프리셋(25/5분 작업/휴식 주기) 및 사용자 지정 기간 옵션이 있는 타이머 컴포넌트를 만듭니다. 타이머 컨트롤(시작, 일시 중지, 재설정, 건너뛰기)을 구현합니다. Supabase에서 루틴/타이머 데이터 모델을 구축합니다. 타이머 세션을 특정 목표와 연결하는 기능을 추가합니다. 세션 기록 및 통계를 구현합니다. 타이머 이벤트에 대한 시각적 및 오디오 알림을 만듭니다.",
-      "testStrategy": "다양한 세션 기간에 걸쳐 타이머 정확도를 테스트합니다. 사용자가 다른 페이지로 이동해도 타이머 상태가 유지되는지 확인합니다. 타이머 세션과 목표 간의 연결을 테스트합니다. 타이머 통계가 올바르게 계산되고 저장되는지 검증합니다."
+      "details": "뽀모도로 프리셋(25/5분 작업/휴식 주기) 및 사용자 지정 기간 옵션이 있는 타이머 컴포넌트를 만듭니다. 타이머 컨트롤(시작, 일시 중지, 재설정, 건너뛰기)을 구현합니다. Supabase에서 타이머 세션 데이터 모델을 구축합니다. 타이머 세션을 특정 목표와 연결하는 기능을 추가합니다. 세션 기록 및 통계를 구현합니다. 타이머 이벤트에 대한 시각적 및 오디오 알림을 만듭니다.",
+      "testStrategy": "다양한 세션 기간에 걸쳐 타이머 정확도를 테스트합니다. 사용자가 다른 페이지로 이동해도 타이머 상태가 유지되는지 확인합니다. 타이머 세션과 목표 간의 연결을 테스트합니다. 타이머 통계가 올바르게 계산되고 저장되는지 검증합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "타이머 UI 컴포넌트 개발",
+          "description": "뽀모도로 및 커스텀 타이머를 위한 UI 컴포넌트를 개발합니다.",
+          "dependencies": [],
+          "details": "1. 타이머 디스플레이 컴포넌트 구현 (시간, 분, 초 표시)\n2. 타이머 컨트롤 버튼 구현 (시작, 일시 중지, 재설정, 건너뛰기)\n3. 뽀모도로 프리셋 선택 UI 구현 (25/5, 50/10 등)\n4. 커스텀 타이머 설정 UI 구현 (사용자 지정 작업/휴식 시간)\n5. 현재 타이머 상태 표시 (작업 중, 휴식 중)\n6. 반응형 디자인 적용\n7. 테스트: 타이머 UI가 모든 상태에서 올바르게 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 2,
+          "title": "타이머 로직 및 상태 관리 구현",
+          "description": "타이머 기능의 핵심 로직과 상태 관리를 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 타이머 카운트다운 로직 구현\n2. 작업/휴식 주기 전환 로직 구현\n3. 타이머 상태 관리 (실행 중, 일시 중지, 중지)\n4. 브라우저 탭 전환 시 타이머 정확성 유지 로직 구현\n5. 로컬 스토리지를 사용한 타이머 상태 유지 구현\n6. 테스트: 다양한 시나리오에서 타이머 로직이 정확하게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 3,
+          "title": "타이머 세션 데이터 모델 및 API 구현",
+          "description": "타이머 세션을 저장하고 관리하기 위한 데이터 모델과 API를 구현합니다.",
+          "dependencies": [
+            2
+          ],
+          "details": "1. Supabase에 타이머 세션 테이블 생성 (user_id, goal_id, start_time, end_time, duration, type 등 포함)\n2. 세션 시작 API 엔드포인트 구현\n3. 세션 종료/업데이트 API 엔드포인트 구현\n4. 세션 조회 API 엔드포인트 구현\n5. 목표별 세션 통계 API 엔드포인트 구현\n6. 테스트: API 엔드포인트가 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 4,
+          "title": "목표 연결 기능 구현",
+          "description": "타이머 세션을 특정 목표와 연결하는 기능을 구현합니다.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "1. 타이머 시작 전 목표 선택 UI 구현\n2. 최근/자주 사용한 목표 빠른 선택 기능 구현\n3. 선택한 목표 정보 표시 UI 구현\n4. 세션 중 목표 변경 기능 구현 (선택적)\n5. 목표 없이 타이머 사용 옵션 구현\n6. 테스트: 목표 선택 및 연결 기능이 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 5,
+          "title": "타이머 알림 기능 구현",
+          "description": "타이머 이벤트(시작, 종료, 휴식 등)에 대한 시각적 및 오디오 알림을 구현합니다.",
+          "dependencies": [
+            2
+          ],
+          "details": "1. 브라우저 알림 API 통합\n2. 알림 소리 선택 옵션 구현\n3. 타이머 종료 시 시각적 피드백 구현 (애니메이션, 색상 변경 등)\n4. 작업/휴식 전환 시 알림 구현\n5. 알림 설정 UI 구현 (소리 켜기/끄기, 볼륨 등)\n6. 테스트: 다양한 브라우저에서 알림이 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 6
+        },
+        {
+          "id": 6,
+          "title": "타이머 통계 및 기록 UI 구현",
+          "description": "사용자의 타이머 사용 기록과 통계를 보여주는 UI를 구현합니다.",
+          "dependencies": [
+            3,
+            4
+          ],
+          "details": "1. 일별/주별/월별 타이머 사용 통계 차트 구현\n2. 목표별 집중 시간 통계 구현\n3. 타이머 세션 기록 목록 UI 구현\n4. 통계 필터링 및 정렬 옵션 구현\n5. 통계 데이터 내보내기 기능 구현 (선택적)\n6. 테스트: 통계 및 기록 UI가 올바른 데이터를 표시하는지 확인",
+          "status": "pending",
+          "parentTaskId": 6
+        }
+      ]
     },
     {
       "id": 7,
@@ -285,7 +410,75 @@
       ],
       "priority": "low",
       "details": "Web Push API 통합을 설정합니다. 예약된 알림을 위한 Supabase Edge Functions를 구성합니다. 알림 권한 요청 흐름을 구현합니다. 다양한 유형(목표 리마인더, 동기부여 메시지)에 대한 알림 템플릿을 만듭니다. 설정에서 알림 기본 설정 UI를 구축합니다. 사용자 기본 설정 및 목표 마감일에 따라 알림 일정을 구현합니다.",
-      "testStrategy": "다양한 브라우저에서 알림 전달을 테스트합니다. 예약된 알림이 올바른 시간에 트리거되는지 확인합니다. 알림에 대한 권한 처리를 테스트합니다. 알림 기본 설정이 존중되는지 검증합니다."
+      "testStrategy": "다양한 브라우저에서 알림 전달을 테스트합니다. 예약된 알림이 올바른 시간에 트리거되는지 확인합니다. 알림에 대한 권한 처리를 테스트합니다. 알림 기본 설정이 존중되는지 검증합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Web Push API 통합 설정",
+          "description": "웹 푸시 알림을 위한 기본 인프라를 설정합니다.",
+          "dependencies": [],
+          "details": "1. 웹 푸시 라이브러리 설치 (web-push, firebase-messaging 등)\n2. 서비스 워커 설정 및 등록\n3. 푸시 알림 구독 관리 구현\n4. 알림 권한 요청 UI 구현\n5. 브라우저 호환성 처리\n6. 테스트: 다양한 브라우저에서 기본 푸시 알림 작동 확인",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 2,
+          "title": "Supabase Edge Functions 설정",
+          "description": "예약된 알림을 처리하기 위한 Supabase Edge Functions를 설정합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Supabase CLI 설치 및 설정\n2. Edge Function 프로젝트 구조 설정\n3. 알림 처리 함수 구현\n4. 예약된 작업 처리 로직 구현\n5. 함수 배포 및 테스트\n6. 테스트: Edge Function이 예약된 시간에 실행되는지 확인",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 3,
+          "title": "알림 데이터 모델 및 API 구현",
+          "description": "알림 설정 및 기록을 저장하기 위한 데이터 모델과 API를 구현합니다.",
+          "dependencies": [
+            2
+          ],
+          "details": "1. Supabase에 알림 설정 테이블 생성 (user_id, type, enabled, time_preferences 등)\n2. 알림 기록 테이블 생성 (user_id, type, content, sent_at, read 등)\n3. 알림 설정 CRUD API 구현\n4. 알림 기록 조회 및 관리 API 구현\n5. 알림 읽음 상태 업데이트 API 구현\n6. 테스트: API 엔드포인트가 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 4,
+          "title": "알림 템플릿 및 콘텐츠 관리 구현",
+          "description": "다양한 유형의 알림을 위한 템플릿과 콘텐츠 관리 시스템을 구현합니다.",
+          "dependencies": [
+            3
+          ],
+          "details": "1. 목표 리마인더 알림 템플릿 구현\n2. 동기부여 메시지 알림 템플릿 구현\n3. 시스템 알림 템플릿 구현\n4. 알림 콘텐츠 생성 및 관리 로직 구현\n5. 알림 우선순위 및 그룹화 로직 구현\n6. 테스트: 다양한 템플릿으로 알림이 올바르게 생성되는지 확인",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 5,
+          "title": "알림 설정 UI 구현",
+          "description": "사용자가 알림 기본 설정을 관리할 수 있는 UI를 구현합니다.",
+          "dependencies": [
+            3,
+            4
+          ],
+          "details": "1. 알림 유형별 켜기/끄기 토글 UI 구현\n2. 알림 시간 및 빈도 설정 UI 구현\n3. 알림 소리 및 진동 설정 UI 구현\n4. 방해 금지 시간 설정 UI 구현\n5. 설정 변경 시 실시간 업데이트 구현\n6. 테스트: 설정 변경이 저장되고 알림에 올바르게 적용되는지 확인",
+          "status": "pending",
+          "parentTaskId": 7
+        },
+        {
+          "id": 6,
+          "title": "알림 표시 및 관리 UI 구현",
+          "description": "수신된 알림을 표시하고 관리하기 위한 UI를 구현합니다.",
+          "dependencies": [
+            4,
+            5
+          ],
+          "details": "1. 알림 센터/드롭다운 UI 구현\n2. 알림 카드 컴포넌트 구현\n3. 읽음/안 읽음 상태 표시 및 관리 기능 구현\n4. 알림 삭제 및 모두 읽음 표시 기능 구현\n5. 알림 필터링 및 정렬 옵션 구현\n6. 테스트: 알림 UI가 모든 상태에서 올바르게 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 7
+        }
+      ]
     },
     {
       "id": 8,
@@ -298,7 +491,78 @@
       ],
       "priority": "low",
       "details": "Supabase에서 MotivationContent 데이터 모델을 구현합니다. 다양한 콘텐츠 유형(인용구, 비디오, 기사)이 있는 콘텐츠 피드 UI를 만듭니다. 사용자 꿈에 대한 콘텐츠 태깅 및 관련성 매칭을 설정합니다. 기본 콘텐츠 추천 알고리즘을 구현합니다. 해당되는 경우 콘텐츠 소스에 대한 외부 API 통합을 추가합니다. 콘텐츠 북마크 기능을 만듭니다.",
-      "testStrategy": "콘텐츠 로딩 및 표시를 테스트합니다. 사용자 꿈에 대한 콘텐츠 관련성을 확인합니다. 콘텐츠 필터링 및 정렬을 테스트합니다. 북마크 기능이 올바르게 작동하는지 검증합니다."
+      "testStrategy": "콘텐츠 로딩 및 표시를 테스트합니다. 사용자 꿈에 대한 콘텐츠 관련성을 확인합니다. 콘텐츠 필터링 및 정렬을 테스트합니다. 북마크 기능이 올바르게 작동하는지 검증합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "동기부여 콘텐츠 데이터 모델 구현",
+          "description": "동기부여 콘텐츠를 저장하고 관리하기 위한 데이터 모델을 구현합니다.",
+          "dependencies": [],
+          "details": "1. Supabase에 MotivationContent 테이블 생성 (type, title, content, source, tags 등 포함)\n2. 콘텐츠-꿈 관계 테이블 생성 (content_id, dream_id, relevance_score 등)\n3. 사용자 북마크 테이블 생성 (user_id, content_id, created_at 등)\n4. 콘텐츠 태그 테이블 생성 및 관계 설정\n5. 필요한 인덱스 및 외래 키 제약 조건 설정\n6. 테스트: 데이터 모델이 올바르게 작동하는지 CRUD 작업으로 확인",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 2,
+          "title": "콘텐츠 관리 API 구현",
+          "description": "동기부여 콘텐츠를 관리하기 위한 API를 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 콘텐츠 조회 API 엔드포인트 구현 (필터링, 정렬, 페이지네이션 포함)\n2. 꿈 관련 콘텐츠 조회 API 구현\n3. 콘텐츠 북마크 추가/제거 API 구현\n4. 북마크된 콘텐츠 조회 API 구현\n5. 콘텐츠 추천 API 구현\n6. 테스트: API 엔드포인트가 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 3,
+          "title": "콘텐츠 태깅 및 관련성 매칭 시스템 구현",
+          "description": "사용자 꿈과 콘텐츠 간의 관련성을 분석하고 매칭하는 시스템을 구현합니다.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. 콘텐츠 자동 태깅 시스템 구현 (키워드 추출 또는 AI 기반)\n2. 꿈 내용 분석 및 키워드 추출 로직 구현\n3. 콘텐츠-꿈 관련성 점수 계산 알고리즘 구현\n4. 관련성 기반 콘텐츠 추천 로직 구현\n5. 사용자 피드백 기반 추천 개선 시스템 구현 (선택적)\n6. 테스트: 다양한 꿈 시나리오에 대해 관련 콘텐츠가 올바르게 매칭되는지 확인",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 4,
+          "title": "외부 콘텐츠 소스 통합",
+          "description": "외부 API를 통해 동기부여 콘텐츠를 가져오는 통합을 구현합니다.",
+          "dependencies": [
+            1,
+            3
+          ],
+          "details": "1. 인용구 API 통합 (Quotable, They Said So 등)\n2. 동영상 콘텐츠 API 통합 (YouTube API 등)\n3. 기사/블로그 콘텐츠 API 통합 (Medium, RSS 피드 등)\n4. 외부 콘텐츠 가져오기 및 저장 로직 구현\n5. 콘텐츠 동기화 및 업데이트 스케줄러 구현\n6. 테스트: 외부 API에서 콘텐츠가 올바르게 가져와지고 저장되는지 확인",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 5,
+          "title": "콘텐츠 피드 UI 구현",
+          "description": "사용자에게 동기부여 콘텐츠를 표시하기 위한 피드 UI를 구현합니다.",
+          "dependencies": [
+            2,
+            3,
+            4
+          ],
+          "details": "1. 메인 콘텐츠 피드 컴포넌트 구현\n2. 콘텐츠 카드 컴포넌트 구현 (다양한 콘텐츠 유형 지원)\n3. 콘텐츠 필터링 및 정렬 UI 구현\n4. 무한 스크롤 또는 페이지네이션 구현\n5. 콘텐츠 상세 보기 모달/페이지 구현\n6. 반응형 디자인 적용\n7. 테스트: 피드 UI가 다양한 콘텐츠 유형과 화면 크기에서 올바르게 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 8
+        },
+        {
+          "id": 6,
+          "title": "콘텐츠 북마크 및 공유 기능 구현",
+          "description": "사용자가 콘텐츠를 북마크하고 공유할 수 있는 기능을 구현합니다.",
+          "dependencies": [
+            2,
+            5
+          ],
+          "details": "1. 콘텐츠 북마크 토글 버튼 구현\n2. 북마크된 콘텐츠 모아보기 페이지 구현\n3. 소셜 미디어 공유 기능 구현\n4. 콘텐츠 URL 복사 기능 구현\n5. 공유 통계 추적 기능 구현 (선택적)\n6. 테스트: 북마크 및 공유 기능이 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 8
+        }
+      ]
     },
     {
       "id": 9,
@@ -311,12 +575,81 @@
       ],
       "priority": "low",
       "details": "Supabase에서 Achievement 데이터 모델을 만듭니다. 사용자 행동 및 목표 완료에 기반한 성취 트리거를 구현합니다. 성취 배지 및 레벨을 설계하고 구현합니다. 사용자 진행 상황의 시각화가 포함된 주간/월간 보고서를 만듭니다. 일관된 목표 완료에 대한 연속 추적을 구현합니다. 성취 및 진행 보고서를 표시하기 위한 UI 컴포넌트를 구축합니다.",
-      "testStrategy": "다양한 사용자 시나리오로 성취 트리거를 테스트합니다. 보고서 생성 정확도를 확인합니다. 연속 계산 로직을 테스트합니다. 성취가 올바르게 저장되고 표시되는지 검증합니다."
+      "testStrategy": "다양한 사용자 시나리오로 성취 트리거를 테스트합니다. 보고서 생성 정확도를 확인합니다. 연속 계산 로직을 테스트합니다. 성취가 올바르게 저장되고 표시되는지 검증합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "성취 데이터 모델 구현",
+          "description": "사용자 성취를 저장하고 관리하기 위한 데이터 모델을 구현합니다.",
+          "dependencies": [],
+          "details": "1. Supabase에 Achievement 테이블 생성 (id, name, description, icon, criteria 등 포함)\n2. 사용자 성취 테이블 생성 (user_id, achievement_id, earned_at 등)\n3. 성취 진행 테이블 생성 (진행형 성취를 위한 추적)\n4. 연속 기록 테이블 생성 (streak_id, user_id, type, current_count, max_count, last_date 등)\n5. 필요한 인덱스 및 외래 키 제약 조건 설정\n6. 테스트: 데이터 모델이 올바르게 작동하는지 CRUD 작업으로 확인",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 2,
+          "title": "성취 트리거 및 로직 구현",
+          "description": "다양한 사용자 행동에 기반하여 성취를 트리거하는 로직을 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 목표 완료 기반 성취 트리거 구현\n2. 연속 기록 기반 성취 트리거 구현\n3. 사용자 활동 기반 성취 트리거 구현 (로그인, 콘텐츠 상호작용 등)\n4. 특별 이벤트 성취 트리거 구현\n5. 성취 조건 검증 및 부여 로직 구현\n6. 테스트: 다양한 시나리오에서 성취 트리거가 올바르게 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 3,
+          "title": "연속 기록 추적 시스템 구현",
+          "description": "사용자의 일관된 목표 완료 및 활동에 대한 연속 기록을 추적하는 시스템을 구현합니다.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. 일일 목표 완료 연속 기록 추적 로직 구현\n2. 앱 사용 연속 기록 추적 로직 구현\n3. 연속 기록 유지 및 중단 조건 정의\n4. 연속 기록 복구 메커니즘 구현 (선택적)\n5. 연속 기록 알림 및 리마인더 구현\n6. 테스트: 연속 기록이 다양한 시나리오에서 올바르게 계산되는지 확인",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 4,
+          "title": "진행 보고서 및 통계 시스템 구현",
+          "description": "사용자 진행 상황에 대한 보고서와 통계를 생성하는 시스템을 구현합니다.",
+          "dependencies": [
+            1,
+            3
+          ],
+          "details": "1. 일일/주간/월간 목표 완료율 계산 로직 구현\n2. 시간 경과에 따른 진행 추세 분석 구현\n3. 성취 및 연속 기록 통계 계산 구현\n4. 사용자 활동 요약 생성 로직 구현\n5. 맞춤형 피드백 및 제안 생성 로직 구현\n6. 테스트: 보고서 및 통계가 정확하게 계산되는지 확인",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 5,
+          "title": "성취 및 배지 UI 구현",
+          "description": "사용자 성취와 배지를 표시하기 위한 UI를 구현합니다.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. 성취 목록 페이지 구현\n2. 성취 배지 컴포넌트 구현 (획득/미획득 상태 표시)\n3. 성취 상세 정보 모달/페이지 구현\n4. 성취 획득 알림 및 축하 애니메이션 구현\n5. 프로필에 표시할 대표 배지 선택 기능 구현\n6. 테스트: 성취 UI가 모든 상태에서 올바르게 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 9
+        },
+        {
+          "id": 6,
+          "title": "진행 보고서 및 통계 UI 구현",
+          "description": "사용자 진행 상황과 통계를 시각화하여 표시하는 UI를 구현합니다.",
+          "dependencies": [
+            4
+          ],
+          "details": "1. 진행 대시보드 페이지 구현\n2. 목표 완료율 차트 컴포넌트 구현\n3. 시간 경과에 따른 추세 그래프 구현\n4. 연속 기록 표시 컴포넌트 구현\n5. 주간/월간 요약 보고서 UI 구현\n6. 맞춤형 피드백 및 제안 표시 UI 구현\n7. 테스트: 보고서 및 통계 UI가 다양한 데이터 시나리오에서 올바르게 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 9
+        }
+      ]
     },
     {
       "id": 10,
-      "title": "[런칭] 설정 및 기록이 포함된 마이 페이지 개발",
-      "description": "설정, 꿈 기록 및 앱 사용자 정의가 포함된 종합적인 사용자 프로필 페이지 생성",
+      "title": "[런칭] 홈 피드 및 프로필 페이지 개발",
+      "description": "꿈 카드 피드와 기본 프로필 페이지 구현",
       "status": "pending",
       "dependencies": [
         2,
@@ -325,8 +658,73 @@
         9
       ],
       "priority": "lowest",
-      "details": "프로필, 꿈, 목표, 성취 및 설정 섹션이 있는 마이 페이지 UI를 설계하고 구현합니다. 필터링 및 정렬 옵션이 있는 꿈 기록 보기를 만듭니다. 알림, 테마 기본 설정 및 개인 정보 보호 옵션에 대한 설정을 구현합니다. 저장된 꿈 시각화를 볼 수 있는 시각화 갤러리를 추가합니다. 사용자 프로필 편집 기능을 만듭니다. 사용자 데이터에 대한 데이터 내보내기 옵션을 구현합니다.",
-      "testStrategy": "올바른 데이터 표시를 위해 모든 마이 페이지 섹션을 테스트합니다. 설정 변경이 적용되고 유지되는지 확인합니다. 다양한 필터링 옵션이 있는 기록 보기를 테스트합니다. 프로필 편집 기능이 올바르게 작동하는지 검증합니다."
+      "details": "모든 꿈을 카드로 보여주는 홈 피드 UI를 설계하고 구현합니다. 꿈 카드 클릭 시 해당 꿈의 목표만 볼 수 있는 상세 페이지로 이동하는 기능을 구현합니다. 꿈 카드에 마감일, 진행률 등 주요 정보를 표시합니다. 기본적인 프로필 페이지를 구현하여 계정명을 표시합니다. 꿈 필터링 및 정렬 옵션을 추가합니다.",
+      "testStrategy": "홈 피드에서 꿈 카드가 올바르게 표시되는지 테스트합니다. 꿈 카드 클릭 시 상세 페이지로 정확히 이동하는지 확인합니다. 다양한 필터링 및 정렬 옵션이 올바르게 작동하는지 테스트합니다. 프로필 페이지에 계정명이 올바르게 표시되는지 검증합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "홈 피드 UI 설계 및 구현",
+          "description": "모든 꿈을 카드로 보여주는 홈 피드 UI를 구현합니다.",
+          "dependencies": [],
+          "details": "1. 홈 피드 페이지 레이아웃 설계 및 구현\n2. 꿈 카드 컴포넌트 디자인 및 구현 (제목, 설명, 마감일, 진행률 표시)\n3. 꿈 데이터 조회 및 표시 로직 구현\n4. 무한 스크롤 또는 페이지네이션 구현\n5. 반응형 그리드 레이아웃 구현\n6. 테스트: 홈 피드가 다양한 꿈 데이터와 화면 크기에서 올바르게 표시되는지 확인\n\n<info added on 2025-05-03T07:43:06.518Z>\n## 구현 세부 사항\n\n### 1. 홈 피드 레이아웃 구현\n```tsx\n// src/pages/Dashboard.tsx\nimport { useEffect, useState } from 'react';\nimport DreamCard from '../components/dream/DreamCard';\nimport { fetchUserDreams } from '../services/supabase';\nimport { Dream } from '../types/dream';\n\nexport default function Dashboard() {\n  const [dreams, setDreams] = useState<Dream[]>([]);\n  const [loading, setLoading] = useState(true);\n  \n  useEffect(() => {\n    async function loadDreams() {\n      try {\n        const data = await fetchUserDreams();\n        setDreams(data);\n      } catch (error) {\n        console.error('Failed to load dreams:', error);\n      } finally {\n        setLoading(false);\n      }\n    }\n    \n    loadDreams();\n  }, []);\n  \n  return (\n    <div className=\"container mx-auto px-4 py-8 max-w-app\">\n      <h1 className=\"text-2xl font-bold mb-6\">내 꿈 목록</h1>\n      \n      {loading ? (\n        <div className=\"flex justify-center py-12\">\n          <LoadingSpinner />\n        </div>\n      ) : dreams.length === 0 ? (\n        <EmptyState message=\"아직 등록된 꿈이 없습니다.\" actionText=\"꿈 추가하기\" />\n      ) : (\n        <div className=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6\">\n          {dreams.map(dream => (\n            <DreamCard key={dream.id} dream={dream} />\n          ))}\n        </div>\n      )}\n    </div>\n  );\n}\n```\n\n### 2. 꿈 카드 컴포넌트 구현\n```tsx\n// src/components/dream/DreamCard.tsx\nimport { useNavigate } from 'react-router-dom';\nimport { Dream } from '../../types/dream';\nimport { formatDate } from '../../utils/dateUtils';\n\ninterface DreamCardProps {\n  dream: Dream;\n}\n\nexport default function DreamCard({ dream }: DreamCardProps) {\n  const navigate = useNavigate();\n  const progress = calculateProgress(dream); // 진행률 계산 함수\n  \n  return (\n    <div \n      className=\"bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-5 cursor-pointer\"\n      onClick={() => navigate(`/dreams/${dream.id}`)}\n    >\n      <h3 className=\"font-semibold text-lg mb-2 truncate\">{dream.title}</h3>\n      <p className=\"text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2\">{dream.description}</p>\n      \n      <div className=\"flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-3\">\n        <span>마감일: {dream.deadline ? formatDate(dream.deadline) : '없음'}</span>\n      </div>\n      \n      <div className=\"w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5\">\n        <div \n          className=\"bg-blue-600 h-2.5 rounded-full\" \n          style={{ width: `${progress}%` }}\n        ></div>\n      </div>\n      <div className=\"text-right text-xs mt-1\">{progress}%</div>\n    </div>\n  );\n}\n\nfunction calculateProgress(dream: Dream): number {\n  // 목표 달성률 계산 로직\n  if (!dream.goals || dream.goals.length === 0) return 0;\n  \n  const completedGoals = dream.goals.filter(goal => goal.completed).length;\n  return Math.round((completedGoals / dream.goals.length) * 100);\n}\n```\n\n### 3. 데이터 페치 서비스\n```tsx\n// src/services/supabase.ts\nimport { supabase } from '../lib/supabaseClient';\nimport { Dream } from '../types/dream';\n\nexport async function fetchUserDreams(\n  page = 1, \n  limit = 12\n): Promise<Dream[]> {\n  const offset = (page - 1) * limit;\n  \n  const { data, error } = await supabase\n    .from('dreams')\n    .select(`\n      *,\n      goals:dream_goals(*)\n    `)\n    .order('created_at', { ascending: false })\n    .range(offset, offset + limit - 1);\n    \n  if (error) {\n    console.error('Error fetching dreams:', error);\n    throw error;\n  }\n  \n  return data || [];\n}\n```\n\n### 4. 무한 스크롤 구현\n```tsx\n// src/hooks/useInfiniteScroll.ts\nimport { useEffect, useState } from 'react';\n\nexport function useInfiniteScroll<T>(\n  fetchFunction: (page: number, limit: number) => Promise<T[]>,\n  limit = 12\n) {\n  const [items, setItems] = useState<T[]>([]);\n  const [page, setPage] = useState(1);\n  const [loading, setLoading] = useState(false);\n  const [hasMore, setHasMore] = useState(true);\n  \n  async function loadMore() {\n    if (loading || !hasMore) return;\n    \n    setLoading(true);\n    try {\n      const newItems = await fetchFunction(page, limit);\n      if (newItems.length < limit) {\n        setHasMore(false);\n      }\n      setItems(prev => [...prev, ...newItems]);\n      setPage(prev => prev + 1);\n    } catch (error) {\n      console.error('Failed to load more items:', error);\n    } finally {\n      setLoading(false);\n    }\n  }\n  \n  // 스크롤 감지 로직\n  useEffect(() => {\n    const handleScroll = () => {\n      if (\n        window.innerHeight + document.documentElement.scrollTop >= \n        document.documentElement.offsetHeight - 300 &&\n        !loading && \n        hasMore\n      ) {\n        loadMore();\n      }\n    };\n    \n    window.addEventListener('scroll', handleScroll);\n    return () => window.removeEventListener('scroll', handleScroll);\n  }, [loading, hasMore]);\n  \n  return { items, loading, hasMore, loadMore };\n}\n```\n\n### 5. 타입 정의\n```tsx\n// src/types/dream.ts\nexport interface Dream {\n  id: string;\n  title: string;\n  description: string;\n  deadline?: string; // ISO 날짜 문자열\n  created_at: string;\n  updated_at: string;\n  user_id: string;\n  goals: DreamGoal[];\n}\n\nexport interface DreamGoal {\n  id: string;\n  dream_id: string;\n  title: string;\n  completed: boolean;\n  created_at: string;\n  updated_at: string;\n}\n```\n\n### 테스트 고려사항\n- 다양한 길이의 제목/설명에 대한 UI 테스트\n- 목표가 없는 꿈의 진행률 표시 확인\n- 스켈레톤 로딩 상태 구현 고려\n- 데이터 없을 때 빈 상태 UI 확인\n- 다크모드/라이트모드 전환 시 UI 확인\n</info added on 2025-05-03T07:43:06.518Z>",
+          "status": "done",
+          "parentTaskId": 10
+        },
+        {
+          "id": 2,
+          "title": "꿈 상세 페이지 구현",
+          "description": "꿈 카드 클릭 시 이동할 꿈 상세 페이지를 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 꿈 상세 페이지 레이아웃 설계 및 구현\n2. 꿈 정보 헤더 섹션 구현 (제목, 설명, 마감일, 진행률 등)\n3. 해당 꿈에 연결된 목표 목록 표시 구현\n4. 목표 필터링 및 정렬 옵션 구현\n5. 꿈 편집 및 삭제 기능 구현\n6. 새 목표 추가 기능 구현\n7. 테스트: 꿈 상세 페이지가 올바른 꿈 데이터와 연결된 목표를 표시하는지 확인",
+          "status": "done",
+          "parentTaskId": 10
+        },
+        {
+          "id": 3,
+          "title": "꿈 필터링 및 정렬 기능 구현",
+          "description": "홈 피드에서 꿈을 필터링하고 정렬할 수 있는 기능을 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 필터 컴포넌트 디자인 및 구현\n2. 마감일 기준 필터링 구현 (임박한 마감, 지난 마감 등)\n3. 진행률 기준 필터링 구현 (완료율 높음/낮음 등)\n4. 생성일/마감일/제목 기준 정렬 구현\n5. 필터 및 정렬 상태 관리 구현\n6. 테스트: 다양한 필터 및 정렬 옵션이 올바르게 작동하는지 확인",
+          "status": "done",
+          "parentTaskId": 10
+        },
+        {
+          "id": 4,
+          "title": "꿈 검색 기능 구현",
+          "description": "홈 피드에서 꿈을 검색할 수 있는 기능을 구현합니다.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. 검색 입력 컴포넌트 디자인 및 구현\n2. 실시간 검색 결과 표시 구현\n3. 검색 쿼리 처리 및 결과 필터링 로직 구현\n4. 검색 결과 없음 상태 처리\n5. 최근 검색어 저장 및 표시 기능 구현 (선택적)\n6. 테스트: 다양한 검색 쿼리에 대해 올바른 결과가 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 10
+        },
+        {
+          "id": 5,
+          "title": "프로필 페이지 구현",
+          "description": "사용자 계정명을 표시하는 기본 프로필 페이지를 구현합니다.",
+          "dependencies": [],
+          "details": "1. 프로필 페이지 레이아웃 설계 및 구현\n2. 사용자 계정명 표시 구현\n3. 프로필 편집 기능 구현 (계정명 변경)\n4. 로그아웃 기능 구현\n5. 계정 설정 옵션 구현 (비밀번호 변경 등)\n6. 테스트: 프로필 페이지가 올바른 사용자 정보를 표시하고 편집 기능이 작동하는지 확인",
+          "status": "pending",
+          "parentTaskId": 10
+        },
+        {
+          "id": 6,
+          "title": "탭 네비게이션 구현",
+          "description": "홈, 꿈, 목표, 프로필 탭 간의 네비게이션을 구현합니다.",
+          "dependencies": [
+            1,
+            5
+          ],
+          "details": "1. 하단 탭 네비게이션 바 디자인 및 구현\n2. 탭 전환 애니메이션 구현\n3. 활성 탭 표시 구현\n4. 탭별 라우팅 설정\n5. 모바일/데스크톱 반응형 네비게이션 구현\n6. 테스트: 탭 네비게이션이 올바르게 작동하고 현재 활성 탭이 표시되는지 확인",
+          "status": "pending",
+          "parentTaskId": 10
+        }
+      ]
     }
   ],
   "metadata": {
