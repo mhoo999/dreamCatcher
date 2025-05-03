@@ -4,6 +4,7 @@ import { supabase } from '../services/supabase';
 import Card from '../components/common/Card';
 import { ArrowLeft } from 'phosphor-react';
 import { Dream } from '../types/dream';
+import GoalList from '../components/common/GoalList';
 
 const DreamDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,23 +55,10 @@ const DreamDetail: React.FC = () => {
               <h2 className="text-xl font-bold text-primary mb-2">{dream.title}</h2>
               <div className="text-xs text-gray-400 mb-2">{dream.deadline ? dream.deadline : dream.created_at?.slice(0,10)}</div>
               <p className="text-gray-700 mb-3 whitespace-pre-line">{dream.description}</p>
-              {dream.goals && dream.goals.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="font-semibold text-base mb-2">연결된 목표</h3>
-                  <ul className="flex flex-col gap-2">
-                    {dream.goals.map(goal => (
-                      <li key={goal.id} className="flex items-center gap-2 text-sm">
-                        <span className={`inline-block w-2 h-2 rounded-full ${goal.completed ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                        <span className={goal.completed ? 'line-through text-gray-400' : ''}>{goal.title}</span>
-                        <span className="ml-auto text-xs text-gray-400">{goal.created_at?.slice(0,10)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {dream.goals && dream.goals.length === 0 && (
-                <div className="mt-4 text-xs text-gray-400">아직 연결된 목표가 없습니다.</div>
-              )}
+              <div className="mt-4">
+                <h3 className="font-semibold text-base mb-2">연결된 목표</h3>
+                <GoalList goals={dream.goals} />
+              </div>
             </Card>
           </>
         ) : null}
