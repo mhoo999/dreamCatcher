@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import Card from '../components/common/Card';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
-const DreamInput = () => {
+const DreamInput: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
@@ -38,37 +39,45 @@ const DreamInput = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 480, margin: '0 auto', padding: 32 }}>
-      <h2>꿈 입력</h2>
-      <input
-        type="text"
-        placeholder="꿈 제목"
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        required
-        style={{ width: '100%', marginBottom: 12 }}
-      />
-      <textarea
-        placeholder="꿈에 대한 설명"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-        required
-        rows={4}
-        style={{ width: '100%', marginBottom: 12 }}
-      />
-      <input
-        type="text"
-        placeholder="태그 (쉼표로 구분)"
-        value={tags}
-        onChange={e => setTags(e.target.value)}
-        style={{ width: '100%', marginBottom: 12 }}
-      />
-      <button type="submit" style={{ width: '100%', fontSize: 16 }}>
-        저장
-      </button>
-      {success && <div style={{ color: 'green', marginTop: 16 }}>꿈이 저장되었습니다!</div>}
-      {error && <div style={{ color: 'red', marginTop: 16 }}>{error}</div>}
-    </form>
+    <div className="flex flex-col items-center justify-center py-8">
+      <div className="w-full max-w-app px-4">
+        <Card>
+          <h2 className="text-lg font-semibold text-primary mb-4">새로운 꿈 입력</h2>
+          <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="꿈 제목"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              required
+            />
+            <textarea
+              className="border rounded-lg px-3 py-2 text-base min-h-[80px] focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="꿈에 대한 설명"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="태그 (쉼표로 구분)"
+              value={tags}
+              onChange={e => setTags(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="bg-gradient-to-br from-primary to-secondary text-white font-bold rounded-lg py-2 mt-2 shadow-card hover:opacity-90 transition"
+            >
+              저장하기
+            </button>
+          </form>
+          {success && <div className="text-green-500 mt-2">꿈이 저장되었습니다!</div>}
+          {error && <div className="text-red-500 mt-2">{error}</div>}
+        </Card>
+      </div>
+    </div>
   );
 };
 

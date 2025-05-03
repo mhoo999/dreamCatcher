@@ -1,6 +1,6 @@
 # Task ID: 2
 # Title: [MVP] 온보딩 및 꿈 입력 흐름 구현
-# Status: pending
+# Status: done
 # Dependencies: 1
 # Priority: high
 # Description: 신규 사용자를 위한 온보딩 경험 및 꿈 입력 인터페이스 생성
@@ -9,3 +9,18 @@
 
 # Test Strategy:
 다양한 입력 시나리오로 전체 온보딩 흐름을 테스트합니다. 꿈 데이터가 Supabase에 올바르게 저장되는지 확인합니다. 필수 필드에 대한 유효성 검사 및 오류 처리를 확인합니다.
+
+# Subtasks:
+## 1. 앱뷰 공통 레이아웃(AppShell) 및 하단 탭바 설계/구현 [done]
+### Dependencies: None
+### Description: 퍼플/그라데이션 테마, 카드형 UI, 하단 탭바 등 모바일 앱 스타일의 공통 레이아웃과 네비게이션 컴포넌트 설계 및 구현. Tailwind CSS 기반으로 max-w, 중앙정렬, 반응형, 카드/탭바/상단바 등 앱뷰 구조를 만든다. 홈(피드) 페이지에 적용해 PC/모바일 모두 네이티브앱처럼 보이도록 한다.
+### Details:
+1. Tailwind CSS 테마 및 글로벌 스타일 세팅
+2. /src/components/layout/AppShell.tsx 생성 및 앱뷰 레이아웃 구현
+3. /src/components/layout/BottomTabBar.tsx 생성 및 하단 탭바 구현
+4. 카드형 UI, 버튼, 태그 등 공통 컴포넌트 설계
+5. 홈(피드) 페이지에 앱뷰 스타일 적용
+6. max-w-[430px] mx-auto min-h-screen 등 Tailwind 유틸리티 활용
+7. 모바일/PC 반응형 및 PWA 지원 구조 설계
+8. 테스트: PC/모바일에서 앱뷰가 일관되게 보이는지 확인
+

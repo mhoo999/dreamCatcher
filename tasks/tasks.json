@@ -72,13 +72,24 @@
       "id": 2,
       "title": "[MVP] 온보딩 및 꿈 입력 흐름 구현",
       "description": "신규 사용자를 위한 온보딩 경험 및 꿈 입력 인터페이스 생성",
-      "status": "pending",
+      "status": "done",
       "dependencies": [
         1
       ],
       "priority": "high",
       "details": "앱 기능을 소개하는 다단계 온보딩 프로세스를 설계하고 구현합니다. 사용자가 제목, 설명 및 선택적 태그로 꿈을 입력할 수 있는 양식을 만듭니다. 데이터 모델 사양에 따라 사용자 및 꿈 모델에 대한 Supabase 테이블을 설정합니다. 적절한 유효성 검사가 포함된 꿈 저장 기능을 구현합니다. 첫 사용자를 위한 환영 화면 및 안내를 추가합니다.",
-      "testStrategy": "다양한 입력 시나리오로 전체 온보딩 흐름을 테스트합니다. 꿈 데이터가 Supabase에 올바르게 저장되는지 확인합니다. 필수 필드에 대한 유효성 검사 및 오류 처리를 확인합니다."
+      "testStrategy": "다양한 입력 시나리오로 전체 온보딩 흐름을 테스트합니다. 꿈 데이터가 Supabase에 올바르게 저장되는지 확인합니다. 필수 필드에 대한 유효성 검사 및 오류 처리를 확인합니다.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "앱뷰 공통 레이아웃(AppShell) 및 하단 탭바 설계/구현",
+          "description": "퍼플/그라데이션 테마, 카드형 UI, 하단 탭바 등 모바일 앱 스타일의 공통 레이아웃과 네비게이션 컴포넌트 설계 및 구현. Tailwind CSS 기반으로 max-w, 중앙정렬, 반응형, 카드/탭바/상단바 등 앱뷰 구조를 만든다. 홈(피드) 페이지에 적용해 PC/모바일 모두 네이티브앱처럼 보이도록 한다.",
+          "details": "1. Tailwind CSS 테마 및 글로벌 스타일 세팅\n2. /src/components/layout/AppShell.tsx 생성 및 앱뷰 레이아웃 구현\n3. /src/components/layout/BottomTabBar.tsx 생성 및 하단 탭바 구현\n4. 카드형 UI, 버튼, 태그 등 공통 컴포넌트 설계\n5. 홈(피드) 페이지에 앱뷰 스타일 적용\n6. max-w-[430px] mx-auto min-h-screen 등 Tailwind 유틸리티 활용\n7. 모바일/PC 반응형 및 PWA 지원 구조 설계\n8. 테스트: PC/모바일에서 앱뷰가 일관되게 보이는지 확인",
+          "status": "done",
+          "dependencies": [],
+          "parentTaskId": 2
+        }
+      ]
     },
     {
       "id": 3,
@@ -98,7 +109,7 @@
           "description": "AI 서비스와의 통신을 위한 기본 인프라 구축 및 API 연동 설정",
           "dependencies": [],
           "details": "1. OpenAI와 Claude API 키 발급 및 환경 변수 설정\n2. API 클라이언트 래퍼 클래스 구현 (요청 전송, 응답 처리, 오류 처리)\n3. API 호출 제한 및 비용 관리를 위한 레이트 리미팅 구현\n4. 기본 프롬프트 템플릿 구조 설계\n5. 간단한 테스트 엔드포인트 구현으로 API 연결 확인\n6. 테스트: 기본 프롬프트로 API 응답 확인 및 응답 형식 검증",
-          "status": "pending",
+          "status": "in-progress",
           "parentTaskId": 3
         },
         {
