@@ -64,8 +64,8 @@ const DreamInput: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-8">
-      <div className="w-full max-w-app px-4">
+    <div className="flex flex-col items-center justify-center py-8 w-full">
+      <div className="w-full px-4">
         <Card>
           <h2 className="text-lg font-semibold text-primary mb-4">새로운 꿈 입력</h2>
           <form className="flex flex-col gap-3" onSubmit={handleSubmit}>

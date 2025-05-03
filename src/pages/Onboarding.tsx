@@ -6,8 +6,8 @@ import { Sparkle, CloudMoon, Target, UserCircle } from 'phosphor-react';
 const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-8 bg-gradient-to-br from-primary/10 to-secondary/10">
-      <div className="w-full max-w-app px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen py-8 bg-gradient-to-br from-primary/10 to-secondary/10 w-full">
+      <div className="w-full px-4">
         <Card className="bg-gradient-to-br from-primary to-secondary text-white mb-6 flex flex-col items-center">
           <Sparkle size={48} weight="fill" className="mb-2" />
           <h1 className="text-2xl font-bold mb-2">DreamCatcher에 오신 걸 환영합니다!</h1>

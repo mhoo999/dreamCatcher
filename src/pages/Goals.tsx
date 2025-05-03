@@ -21,7 +21,7 @@ const Goals: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-app">
+    <div className="w-full px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">모든 목표</h1>
       {loading ? (
         <div className="flex justify-center py-12">로딩 중...</div>

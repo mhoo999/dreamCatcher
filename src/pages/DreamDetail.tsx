@@ -36,8 +36,8 @@ const DreamDetail: React.FC = () => {
   }, [id]);
 
   return (
-    <div className="flex flex-col items-center justify-center py-8 min-h-screen">
-      <div className="w-full max-w-app px-4">
+    <div className="flex flex-col items-center justify-center py-8 min-h-screen w-full">
+      <div className="w-full px-4">
         <button
           className="mb-4 flex items-center gap-1 text-primary hover:underline"
           onClick={() => navigate(-1)}
