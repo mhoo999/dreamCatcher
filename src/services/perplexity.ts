@@ -2,8 +2,15 @@
 let PERPLEXITY_API_KEY = '';
 if (typeof process !== 'undefined' && process.env && process.env.PERPLEXITY_API_KEY) {
   PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
-} else if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PERPLEXITY_API_KEY) {
-  PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY;
+} else {
+  // Vite(브라우저) 환경에서만 import.meta.env 사용 (Node.js에서는 문법 에러 방지)
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PERPLEXITY_API_KEY) {
+      PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY;
+    }
+  } catch (e) {
+    // Node.js 환경에서는 import.meta 자체가 문법적으로 불가하므로 무시
+  }
 }
 
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
