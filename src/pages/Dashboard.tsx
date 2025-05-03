@@ -1,43 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../services/supabase';
-import Card from '../components/common/Card';
-import { useNavigate } from 'react-router-dom';
 import DreamCard from '../components/dream/DreamCard';
 import { fetchUserDreams } from '../services/supabase';
 import { Dream } from '../types/dream';
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
   const [dreams, setDreams] = useState<Dream[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!user) return;
-    setLoading(true);
-    setError(null);
-    supabase
-      .from('dreams')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('id', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          setError('꿈 목록을 불러오지 못했습니다: ' + error.message);
-          setDreams([]);
-        } else {
-          setDreams(
-            (data || []).map(d => ({
-              ...d,
-              date: d.created_at ? d.created_at.slice(0, 10) : '',
-            }))
-          );
-        }
-        setLoading(false);
-      });
-  }, [user]);
 
   useEffect(() => {
     async function loadDreams() {
