@@ -3,14 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Card from '../components/common/Card';
 import { ArrowLeft } from 'phosphor-react';
-
-interface Dream {
-  id: number;
-  title: string;
-  description: string;
-  tags?: string;
-  date: string;
-}
+import { Dream, DreamGoal } from '../types/dream';
 
 const DreamDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +18,7 @@ const DreamDetail: React.FC = () => {
     setError(null);
     supabase
       .from('dreams')
-      .select('*')
+      .select('*, goals:dream_goals(*)')
       .eq('id', id)
       .single()
       .then(({ data, error }) => {
@@ -35,7 +28,7 @@ const DreamDetail: React.FC = () => {
         } else {
           setDream({
             ...data,
-            date: data.created_at ? data.created_at.slice(0, 10) : '',
+            goals: data.goals || [],
           });
         }
         setLoading(false);
@@ -56,18 +49,30 @@ const DreamDetail: React.FC = () => {
         ) : error ? (
           <Card><div className="text-red-500 text-center py-8">{error}</div></Card>
         ) : dream ? (
-          <Card>
-            <h2 className="text-xl font-bold text-primary mb-2">{dream.title}</h2>
-            <div className="text-xs text-gray-400 mb-2">{dream.date}</div>
-            <p className="text-gray-700 mb-3 whitespace-pre-line">{dream.description}</p>
-            {dream.tags && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {dream.tags.split(',').map(tag => (
-                  <span key={tag} className="bg-primary/10 text-primary text-xs rounded px-2 py-0.5">#{tag.trim()}</span>
-                ))}
-              </div>
-            )}
-          </Card>
+          <>
+            <Card>
+              <h2 className="text-xl font-bold text-primary mb-2">{dream.title}</h2>
+              <div className="text-xs text-gray-400 mb-2">{dream.deadline ? dream.deadline : dream.created_at?.slice(0,10)}</div>
+              <p className="text-gray-700 mb-3 whitespace-pre-line">{dream.description}</p>
+              {dream.goals && dream.goals.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="font-semibold text-base mb-2">연결된 목표</h3>
+                  <ul className="flex flex-col gap-2">
+                    {dream.goals.map(goal => (
+                      <li key={goal.id} className="flex items-center gap-2 text-sm">
+                        <span className={`inline-block w-2 h-2 rounded-full ${goal.completed ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                        <span className={goal.completed ? 'line-through text-gray-400' : ''}>{goal.title}</span>
+                        <span className="ml-auto text-xs text-gray-400">{goal.created_at?.slice(0,10)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {dream.goals && dream.goals.length === 0 && (
+                <div className="mt-4 text-xs text-gray-400">아직 연결된 목표가 없습니다.</div>
+              )}
+            </Card>
+          </>
         ) : null}
       </div>
     </div>
