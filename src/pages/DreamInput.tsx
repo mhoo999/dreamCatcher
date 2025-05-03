@@ -7,14 +7,18 @@ const DreamInput: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
+  const [deadline, setDeadline] = useState('');
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiGoals, setAiGoals] = useState<string | null>(null);
   const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    setAiGoals(null);
     if (!user) {
       setError('로그인이 필요합니다.');
       return;
@@ -25,6 +29,7 @@ const DreamInput: React.FC = () => {
         title,
         description,
         tags,
+        deadline: deadline || null,
       }
     ]);
     if (error) {
@@ -35,6 +40,26 @@ const DreamInput: React.FC = () => {
       setTitle('');
       setDescription('');
       setTags('');
+      setDeadline('');
+      // AI 목표 생성 연동
+      setAiLoading(true);
+      try {
+        const res = await fetch('/api/generate-goals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dream: `${title} ${description}`, deadline }),
+        });
+        const data = await res.json();
+        if (res.ok && data.goals) {
+          setAiGoals(data.goals);
+        } else {
+          setAiGoals('AI 목표 생성에 실패했습니다.');
+        }
+      } catch (e) {
+        setAiGoals('AI 목표 생성 중 오류가 발생했습니다.');
+      } finally {
+        setAiLoading(false);
+      }
     }
   };
 
@@ -66,15 +91,30 @@ const DreamInput: React.FC = () => {
               value={tags}
               onChange={e => setTags(e.target.value)}
             />
+            <input
+              type="date"
+              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="마감일 (선택)"
+              value={deadline}
+              onChange={e => setDeadline(e.target.value)}
+            />
             <button
               type="submit"
               className="bg-gradient-to-br from-primary to-secondary text-white font-bold rounded-lg py-2 mt-2 shadow-card hover:opacity-90 transition"
+              disabled={aiLoading}
             >
-              저장하기
+              {aiLoading ? 'AI 목표 생성 중...' : '저장하기'}
             </button>
           </form>
           {success && <div className="text-green-500 mt-2">꿈이 저장되었습니다!</div>}
           {error && <div className="text-red-500 mt-2">{error}</div>}
+          {aiLoading && <div className="text-blue-500 mt-2">AI 목표를 생성 중입니다...</div>}
+          {aiGoals && (
+            <div className="mt-4 p-3 bg-gray-50 rounded text-sm whitespace-pre-line border border-gray-200">
+              <div className="font-semibold text-primary mb-1">AI가 제안한 목표</div>
+              {aiGoals}
+            </div>
+          )}
         </Card>
       </div>
     </div>
