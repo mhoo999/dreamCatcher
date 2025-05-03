@@ -1,22 +1,14 @@
-// 환경 변수 로딩 (Node.js 서버/브라우저 모두 지원)
+// Node.js(Serverless) 환경에서는 import.meta 관련 코드를 완전히 제거
 let PERPLEXITY_API_KEY = '';
 if (typeof process !== 'undefined' && process.env && process.env.PERPLEXITY_API_KEY) {
   PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
-} else {
-  // Vite(브라우저) 환경에서만 import.meta.env 사용 (Node.js에서는 문법 에러 방지)
-  try {
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_PERPLEXITY_API_KEY) {
-      PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY;
-    }
-  } catch (e) {
-    // Node.js 환경에서는 import.meta 자체가 문법적으로 불가하므로 무시
-  }
 }
+// 브라우저(Vite) 환경에서만 import.meta.env를 사용하려면 별도 파일에서 관리
 
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
 
 if (!PERPLEXITY_API_KEY) {
-  throw new Error('PERPLEXITY_API_KEY (서버) 또는 VITE_PERPLEXITY_API_KEY (클라이언트) 환경변수가 설정되어 있지 않습니다.');
+  throw new Error('PERPLEXITY_API_KEY 환경변수가 설정되어 있지 않습니다.');
 }
 
 export type PerplexityMessage = {
