@@ -26,7 +26,7 @@ try {
     ];
 
     try {
-      const aiRes = await createPerplexityCompletion(messages, 'sonar-medium-online', { temperature: 0.7 });
+      const aiRes = await createPerplexityCompletion(messages, 'llama-3-sonar-large-32k-online', { temperature: 0.7 });
       res.status(200).json({ goals: aiRes.choices?.[0]?.message?.content || '' });
     } catch (e) {
       console.error('Handler error:', e);
