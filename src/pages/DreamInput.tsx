@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Card from '../components/common/Card';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { Goal } from '../types/goal';
 
 const DreamInput: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -12,6 +13,7 @@ const DreamInput: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiGoals, setAiGoals] = useState<string | null>(null);
+  const [goalSaveResult, setGoalSaveResult] = useState<string | null>(null);
   const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,47 +21,84 @@ const DreamInput: React.FC = () => {
     setError(null);
     setSuccess(false);
     setAiGoals(null);
+    setGoalSaveResult(null);
     if (!user) {
       setError('로그인이 필요합니다.');
       return;
     }
-    const { error } = await supabase.from('dreams').insert([
-      {
-        user_id: user.id,
-        title,
-        description,
-        tags,
-        deadline: deadline || null,
+    // 1. 꿈 저장 및 id 받아오기
+    let dreamRow;
+    try {
+      const { data, error } = await supabase
+        .from('dreams')
+        .insert([
+          {
+            user_id: user.id,
+            title,
+            description,
+            tags,
+            deadline: deadline || null,
+          }
+        ])
+        .select()
+        .single();
+      if (error || !data) {
+        setError('저장 실패: ' + (error?.message || '')); return;
       }
-    ]);
-    if (error) {
-      setError('저장 실패: ' + error.message);
-      setSuccess(false);
-    } else {
-      setSuccess(true);
-      setTitle('');
-      setDescription('');
-      setTags('');
-      setDeadline('');
-      // AI 목표 생성 연동
-      setAiLoading(true);
-      try {
-        const res = await fetch('/api/generate-goals', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dream: `${title} ${description}`, deadline }),
-        });
-        const data = await res.json();
-        if (res.ok && data.goals) {
-          setAiGoals(data.goals);
+      dreamRow = data;
+    } catch (err: any) {
+      setError('저장 실패: ' + err.message); return;
+    }
+    setSuccess(true);
+    setTitle(''); setDescription(''); setTags(''); setDeadline('');
+    // 2. AI 목표 생성
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/generate-goals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dream: `${title} ${description}`, deadline }),
+      });
+      const data = await res.json();
+      if (res.ok && data.goals) {
+        setAiGoals(data.goals);
+        // 3. 목표 파싱 및 저장
+        const lines = data.goals
+          .split(/\n|\r/)
+          .map((line: string) => line.trim())
+          .filter((line: string) => line && (/^\d+\.|^- /.test(line) || line.length > 3));
+        // 번호/대시 제거
+        const parsedGoals = lines.map((line: string) => line.replace(/^\d+\.\s*|^-\s*/, '').trim()).filter(Boolean);
+        if (parsedGoals.length === 0) {
+          setGoalSaveResult('AI 목표 파싱 실패: 저장된 목표가 없습니다.');
         } else {
-          setAiGoals('AI 목표 생성에 실패했습니다.');
+          // Supabase에 목표 저장
+          const results = await Promise.all(parsedGoals.map(async (goalTitle: string) => {
+            try {
+              await supabase.from('goals').insert({
+                dream_id: dreamRow.id,
+                title: goalTitle,
+                completed: false,
+                status: 'proposed',
+              });
+              return true;
+            } catch {
+              return false;
+            }
+          }));
+          if (results.every(Boolean)) {
+            setGoalSaveResult('AI 목표가 성공적으로 저장되었습니다!');
+          } else {
+            setGoalSaveResult('일부 목표 저장에 실패했습니다.');
+          }
         }
-      } catch (e) {
-        setAiGoals('AI 목표 생성 중 오류가 발생했습니다.');
-      } finally {
-        setAiLoading(false);
+      } else {
+        setAiGoals('AI 목표 생성에 실패했습니다.');
       }
+    } catch (e) {
+      setAiGoals('AI 목표 생성 중 오류가 발생했습니다.');
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -114,6 +153,7 @@ const DreamInput: React.FC = () => {
             {aiGoals}
           </div>
         )}
+        {goalSaveResult && <div className="text-blue-600 mt-2">{goalSaveResult}</div>}
       </Card>
     </div>
   );
