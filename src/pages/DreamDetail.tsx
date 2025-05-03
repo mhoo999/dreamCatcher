@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import Card from '../components/common/Card';
 import { ArrowLeft } from 'phosphor-react';
-import { Dream, DreamGoal } from '../types/dream';
+import { Dream } from '../types/dream';
 
 const DreamDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
