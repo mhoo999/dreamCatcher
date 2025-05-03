@@ -12,29 +12,49 @@ const DreamDetail: React.FC = () => {
   const [dream, setDream] = useState<Dream | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [goalUpdating, setGoalUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchDream = async () => {
     if (!id) return;
     setLoading(true);
     setError(null);
-    supabase
+    const { data, error } = await supabase
       .from('dreams')
       .select('*, goals:dream_goals(*)')
       .eq('id', id)
-      .single()
-      .then(({ data, error }) => {
-        if (error || !data) {
-          setError('꿈 정보를 불러올 수 없습니다.');
-          setDream(null);
-        } else {
-          setDream({
-            ...data,
-            goals: data.goals || [],
-          });
-        }
-        setLoading(false);
+      .single();
+    if (error || !data) {
+      setError('꿈 정보를 불러올 수 없습니다.');
+      setDream(null);
+    } else {
+      setDream({
+        ...data,
+        goals: data.goals || [],
       });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchDream();
+    // eslint-disable-next-line
   }, [id]);
+
+  // 목표 완료 상태 토글 핸들러
+  const handleToggleCompleted = async (goal: any) => {
+    if (!goal || !goal.id) return;
+    setGoalUpdating(goal.id);
+    const { error } = await supabase
+      .from('goals')
+      .update({ completed: !goal.completed })
+      .eq('id', goal.id);
+    setGoalUpdating(null);
+    if (!error) {
+      fetchDream(); // 상태 변경 후 새로고침
+    } else {
+      alert('목표 상태 변경에 실패했습니다.');
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center py-8 min-h-screen w-full">
@@ -57,7 +77,8 @@ const DreamDetail: React.FC = () => {
               <p className="text-gray-700 mb-3 whitespace-pre-line">{dream.description}</p>
               <div className="mt-4">
                 <h3 className="font-semibold text-base mb-2">연결된 목표</h3>
-                <GoalList goals={dream.goals} />
+                <GoalList goals={dream.goals} onToggleCompleted={handleToggleCompleted} />
+                {goalUpdating && <div className="text-xs text-blue-500 mt-2">상태 변경 중...</div>}
               </div>
             </Card>
           </>
