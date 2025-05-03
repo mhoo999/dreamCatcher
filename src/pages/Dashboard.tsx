@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
   });
 
   return (
-    <div className="w-full px-4 py-8">
+    <div className="w-full min-h-screen flex flex-col bg-background px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">내 꿈 목록</h1>
       <div className="flex flex-wrap gap-2 mb-4 items-center">
         <label className="text-sm font-medium">정렬:</label>

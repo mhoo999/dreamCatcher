@@ -1,6 +1,6 @@
 # Task ID: 1
 # Title: [MVP] 프로젝트 인프라 및 인증 구축
-# Status: pending
+# Status: done
 # Dependencies: None
 # Priority: high
 # Description: React 프로젝트 초기화, Supabase 통합 구성 및 사용자 인증 흐름 구현

@@ -120,8 +120,8 @@ const DreamDetail: React.FC = () => {
   };
 
   return (
-    <div className="w-full px-4 py-8 flex flex-col items-center justify-center min-h-screen bg-background">
-      <div className="w-full px-4">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-background">
+      <div className="w-full max-w-[600px]">
         <button
           className="mb-4 flex items-center gap-1 text-primary hover:underline"
           onClick={() => navigate(-1)}

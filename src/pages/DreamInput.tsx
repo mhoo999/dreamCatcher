@@ -29,16 +29,19 @@ const DreamInput: React.FC = () => {
     }
     // 1. 꿈 저장 및 id 받아오기
     let dreamRow;
+    const prevTitle = title;
+    const prevDescription = description;
+    const prevDeadline = deadline;
     try {
       const { data, error } = await supabase
         .from('dreams')
         .insert([
           {
             user_id: user.id,
-            title,
-            description,
+            title: prevTitle,
+            description: prevDescription,
             tags,
-            deadline: deadline || null,
+            deadline: prevDeadline || null,
           }
         ])
         .select()
@@ -51,14 +54,13 @@ const DreamInput: React.FC = () => {
       setError('저장 실패: ' + err.message); return;
     }
     setSuccess(true);
-    setTitle(''); setDescription(''); setTags(''); setDeadline('');
     // 2. AI 목표 생성
     setAiLoading(true);
     try {
       const res = await fetch('/api/generate-goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dream: `${title} ${description}`, deadline }),
+        body: JSON.stringify({ dream: `${prevTitle} ${prevDescription}`, deadline: prevDeadline }),
       });
       const data = await res.json();
       if (res.ok && data.goals) {
@@ -100,6 +102,8 @@ const DreamInput: React.FC = () => {
       setAiGoals('AI 목표 생성 중 오류가 발생했습니다.');
     } finally {
       setAiLoading(false);
+      // 폼 초기화는 모든 저장이 끝난 후에!
+      setTitle(''); setDescription(''); setTags(''); setDeadline('');
     }
   };
 
@@ -132,7 +136,7 @@ const DreamInput: React.FC = () => {
   };
 
   return (
-    <div className="w-full px-4 py-8 flex flex-col items-center justify-center min-h-screen bg-background">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-background">
       <Card className="w-full max-w-[430px]">
         <h2 className="text-lg font-semibold text-primary mb-4">새로운 꿈 입력</h2>
         <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
