@@ -2,14 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Card from '../components/common/Card';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../contexts/AuthContext';
-
-interface Goal {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  date: string;
-}
+import { fetchAllGoals } from '../services/supabase';
+import { Goal } from '../types/goal';
 
 const Goals: React.FC = () => {
   const { user } = useAuth();
@@ -89,70 +83,44 @@ const Goals: React.FC = () => {
     fetchGoals();
   };
 
+  useEffect(() => {
+    async function loadGoals() {
+      try {
+        const data = await fetchAllGoals();
+        setGoals(data);
+      } catch (error) {
+        console.error('Failed to load goals:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadGoals();
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center py-8">
-      <div className="w-full max-w-app px-4">
-        <Card className="mb-4">
-          <h2 className="text-lg font-semibold text-primary mb-2">새 목표 추가</h2>
-          <form className="flex flex-col gap-2" onSubmit={handleAddGoal}>
-            <input
-              type="text"
-              className="border rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="목표 제목"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              required
-            />
-            <textarea
-              className="border rounded-lg px-3 py-2 text-base min-h-[60px] focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="목표 설명"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              required
-            />
-            <button
-              type="submit"
-              className="bg-gradient-to-br from-primary to-secondary text-white font-bold rounded-lg py-2 mt-2 shadow-card hover:opacity-90 transition"
-            >
-              저장하기
-            </button>
-          </form>
-          {addSuccess && <div className="text-green-500 mt-2">목표가 저장되었습니다!</div>}
-          {addError && <div className="text-red-500 mt-2">{addError}</div>}
-        </Card>
-        <h2 className="text-lg font-semibold text-primary mb-3">나의 목표</h2>
-        {loading ? (
-          <div className="text-gray-400 text-center py-8">목표를 불러오는 중...</div>
-        ) : error ? (
-          <div className="text-red-500 text-center py-8">{error}</div>
-        ) : goals.length === 0 ? (
-          <div className="text-gray-400 text-center py-8">아직 등록된 목표가 없습니다.<br/>AI 기반 목표 제안 기능을 통해 목표를 생성해보세요!</div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {goals.map(goal => (
-              <Card key={goal.id}>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-base text-primary">{goal.title}</span>
-                    <span className="text-xs text-gray-400">{goal.date}</span>
-                  </div>
-                  <p className="text-gray-700 text-sm mb-1">{goal.description}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`inline-block text-xs rounded px-2 py-0.5 ${goal.status === 'done' ? 'bg-green-100 text-green-600' : 'bg-primary/10 text-primary'}`}>{goal.status === 'done' ? '완료' : '진행중'}</span>
-                    <button
-                      className={`ml-2 text-xs rounded px-2 py-0.5 border transition ${goal.status === 'done' ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-primary text-white border-primary hover:opacity-90'} ${updatingId === goal.id ? 'opacity-60' : ''}`}
-                      onClick={() => handleComplete(goal.id)}
-                      disabled={goal.status === 'done' || updatingId === goal.id}
-                    >
-                      {goal.status === 'done' ? '완료됨' : updatingId === goal.id ? '처리중...' : '완료'}
-                    </button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="container mx-auto px-4 py-8 max-w-app">
+      <h1 className="text-2xl font-bold mb-6">모든 목표</h1>
+      {loading ? (
+        <div className="flex justify-center py-12">로딩 중...</div>
+      ) : goals.length === 0 ? (
+        <div className="text-center text-gray-400 py-12">아직 등록된 목표가 없습니다.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {goals.map(goal => (
+            <div key={goal.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-5">
+              <h3 className="font-semibold text-lg mb-2 truncate">{goal.title}</h3>
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>상태: {goal.status}</span>
+                <span>생성일: {goal.created_at?.slice(0,10)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-block w-2 h-2 rounded-full ${goal.completed ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                <span className={goal.completed ? 'line-through text-gray-400' : ''}>{goal.completed ? '완료' : '진행중'}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
